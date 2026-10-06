@@ -7,6 +7,7 @@ import { Alerta, Campo, estilos } from "@/components/ui";
 export function FormNovoUsuario() {
   const [estado, acao, pendente] = useActionState(criarUsuario, undefined);
   const erros = estado?.errosCampo ?? {};
+  const valores = estado?.valores ?? {};
 
   return (
     // key força limpar os campos depois de criar com sucesso
@@ -22,22 +23,23 @@ export function FormNovoUsuario() {
         </div>
       )}
       <Campo rotulo="Nome" nome="nome" erros={erros.nome}>
-        <input id="nome" name="nome" required className={estilos.input} aria-invalid={!!erros.nome} />
+        <input id="nome" name="nome" required defaultValue={valores.nome} className={estilos.input} aria-invalid={!!erros.nome} />
       </Campo>
       <Campo rotulo="E-mail" nome="email" erros={erros.email}>
-        <input id="email" name="email" type="email" required className={estilos.input} aria-invalid={!!erros.email} />
+        <input id="email" name="email" type="email" required defaultValue={valores.email} className={estilos.input} aria-invalid={!!erros.email} />
       </Campo>
       <Campo rotulo="Departamento" nome="departamento" erros={erros.departamento}>
         <input
           id="departamento"
           name="departamento"
           required
+          defaultValue={valores.departamento}
           className={estilos.input}
           aria-invalid={!!erros.departamento}
         />
       </Campo>
       <Campo rotulo="Perfil" nome="perfil" erros={erros.perfil}>
-        <select id="perfil" name="perfil" defaultValue="SOLICITANTE" className={estilos.input}>
+        <select id="perfil" name="perfil" defaultValue={valores.perfil ?? "SOLICITANTE"} className={estilos.input}>
           <option value="SOLICITANTE">Solicitante</option>
           <option value="ADMIN">Admin</option>
         </select>

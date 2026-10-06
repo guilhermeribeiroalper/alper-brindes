@@ -10,7 +10,7 @@ export function FormLogin() {
     <form action={acao} className={`${estilos.cartao} space-y-4 p-6`}>
       {estado?.erro && <Alerta tipo="erro">{estado.erro}</Alerta>}
       <Campo rotulo="E-mail" nome="email">
-        <input id="email" name="email" type="email" autoComplete="email" required className={estilos.input} />
+        <input id="email" name="email" type="email" autoComplete="email" required defaultValue={estado?.valores?.email} className={estilos.input} />
       </Campo>
       <Campo rotulo="Senha" nome="senha">
         <input

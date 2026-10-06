@@ -42,3 +42,8 @@ export function brlParaCentavos(texto: string): number | null {
 export function centavosParaTexto(centavos: number): string {
   return (centavos / 100).toFixed(2).replace(".", ",");
 }
+
+/** Normaliza texto para busca: minúsculas e sem acentos. */
+export function normalizarBusca(texto: string): string {
+  return texto.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().trim();
+}

@@ -25,3 +25,5 @@ Status: **PROPOSTA** = aguardando confirmação · **CONFIRMADA** · **ALTERADA*
 | S18 | Duração da sessão | A sessão expira em 12 horas; depois disso é preciso entrar de novo. Desativar um usuário ou redefinir a senha dele encerra todas as sessões dele. | PROPOSTA |
 | S19 | Senhas | Senha com no mínimo 8 caracteres. O admin define a senha inicial e pode redefini-la; não há "esqueci minha senha" (dependeria de e-mail, fora do escopo). | PROPOSTA |
 | S20 | Proteção do próprio admin | O admin não pode desativar a si mesmo nem retirar o próprio perfil ADMIN, para não ficar sem nenhum administrador. | PROPOSTA |
+| S21 | Busca | A busca ignora maiúsculas e acentos e é feita na aplicação (não no banco), para o comportamento ser igual em SQLite e PostgreSQL. Adequado ao volume esperado de um catálogo interno (centenas de itens). | PROPOSTA |
+| S22 | Validade padrão | Ao cadastrar um preço, a validade sugerida é hoje + 90 dias (editável). | PROPOSTA |

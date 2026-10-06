@@ -14,7 +14,8 @@ export async function entrar(_estado: EstadoForm, formData: FormData): Promise<E
     email: formData.get("email"),
     senha: formData.get("senha"),
   });
-  if (!dados.success) return { erro: "Informe e-mail e senha." };
+  const valores = { email: String(formData.get("email") ?? "") };
+  if (!dados.success) return { erro: "Informe e-mail e senha.", valores };
 
   const usuario = await db.usuario.findUnique({
     where: { email: dados.data.email },
@@ -24,8 +25,8 @@ export async function entrar(_estado: EstadoForm, formData: FormData): Promise<E
     dados.data.senha,
     usuario?.senhaHash ?? (await obterHashFicticio()),
   );
-  if (!usuario || !senhaOk) return { erro: "E-mail ou senha incorretos." };
-  if (!usuario.ativo) return { erro: "Usuário desativado. Procure o administrador." };
+  if (!usuario || !senhaOk) return { erro: "E-mail ou senha incorretos.", valores };
+  if (!usuario.ativo) return { erro: "Usuário desativado. Procure o administrador.", valores };
 
   await criarSessao(usuario.id);
   redirect(usuario.perfil === "ADMIN" ? "/admin" : "/catalogo");
