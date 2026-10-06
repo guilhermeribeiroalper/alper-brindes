@@ -1,0 +1,16 @@
+import { redirect } from "next/navigation";
+import { obterUsuarioAtual } from "@/lib/auth/sessao";
+import { Navegacao } from "@/components/navegacao";
+
+// O layout só monta a navegação. A autorização é verificada em cada página e action.
+export default async function LayoutApp({ children }: { children: React.ReactNode }) {
+  const usuario = await obterUsuarioAtual();
+  if (!usuario) redirect("/login");
+
+  return (
+    <>
+      <Navegacao nome={usuario.nome} perfil={usuario.perfil} />
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:py-8">{children}</main>
+    </>
+  );
+}

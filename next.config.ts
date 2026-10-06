@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Fixa a raiz do projeto (há um package-lock.json solto em pasta superior em algumas máquinas).
+  turbopack: { root: process.cwd() },
 };
 
 export default nextConfig;
