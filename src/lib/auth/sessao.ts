@@ -16,6 +16,8 @@ function hashToken(token: string): string {
 export async function criarSessao(usuarioId: string): Promise<void> {
   const token = randomBytes(32).toString("base64url");
   const expiraEm = new Date(Date.now() + DURACAO_MS);
+  // Aproveita o login para limpar sessões expiradas.
+  await db.sessao.deleteMany({ where: { expiraEm: { lt: new Date() } } });
   await db.sessao.create({ data: { tokenHash: hashToken(token), usuarioId, expiraEm } });
 
   const cookieStore = await cookies();

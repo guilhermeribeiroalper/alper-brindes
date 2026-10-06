@@ -1,36 +1,163 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Catálogo de Brindes · Alper
 
-## Getting Started
+Aplicação web interna para consultar brindes, obter uma estimativa de preço imediata e enviar solicitações formais de cotação ao administrador.
 
-First, run the development server:
+- **ADMIN** cadastra produtos, fornecedores e preços por fornecedor (com faixas de quantidade, prazo e validade), responde às cotações e gerencia usuários.
+- **SOLICITANTE** consulta o catálogo, simula estimativas, monta uma lista (carrinho) e acompanha as próprias solicitações. **Nunca vê fornecedores**, só a faixa de preço.
+
+## Stack
+
+| Item | Versão |
+|---|---|
+| Next.js (App Router, Turbopack) + React | 16.3 / 19.2 |
+| TypeScript | 5 |
+| Prisma ORM (adaptador `better-sqlite3`) | 7.10 |
+| Banco | SQLite (desenvolvimento) · PostgreSQL (produção, ver abaixo) |
+| Tailwind CSS | 4 |
+| Zod (validação) | 4 |
+| bcryptjs (hash de senha) | 3 |
+| Vitest (testes) | 5 |
+
+Autenticação própria: e-mail e senha, sessão guardada no banco e cookie `httpOnly` com token aleatório (no banco fica só o hash SHA-256 do token).
+
+## Pré-requisitos
+
+- Node.js **20.9 ou superior** (testado com Node 24)
+- npm. No npm 11 ou superior, os scripts de instalação já liberados estão em `allowScripts` no `package.json` (Prisma, better-sqlite3, esbuild).
+
+## Instalação
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install                 # também roda "prisma generate"
+cp .env.example .env        # no Windows (PowerShell): Copy-Item .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Edite o `.env` e defina **senhas fortes** em `SEED_ADMIN_SENHA` e `SEED_SOLICITANTE_SENHA`. O arquivo `.env` não vai para o repositório.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run db:migrate          # cria o banco SQLite (prisma/dev.db) e aplica as migrações
+npm run db:seed             # cria o admin, o solicitante de exemplo, 2 fornecedores e 5 produtos
+npm run dev                 # http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Entre com o e-mail e a senha definidos no `.env`.
 
-## Learn More
+## Variáveis de ambiente
 
-To learn more about Next.js, take a look at the following resources:
+| Variável | Obrigatória | Descrição |
+|---|---|---|
+| `DATABASE_URL` | sim | SQLite: `file:./prisma/dev.db` (caminho relativo à raiz). PostgreSQL: `postgresql://usuario:senha@host:5432/brindes` |
+| `SEED_ADMIN_EMAIL` | para o seed | E-mail do admin inicial |
+| `SEED_ADMIN_SENHA` | para o seed | Senha do admin inicial (mín. 8 caracteres recomendada) |
+| `SEED_ADMIN_NOME` | não | Nome do admin inicial (padrão "Administrador") |
+| `SEED_SOLICITANTE_EMAIL` / `SEED_SOLICITANTE_SENHA` | não | Solicitante de exemplo. Se a senha ficar vazia, ele não é criado |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+O seed pode ser executado várias vezes: não sobrescreve usuários existentes e só cria os produtos de exemplo se o catálogo estiver vazio.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Scripts
 
-## Deploy on Vercel
+| Comando | O que faz |
+|---|---|
+| `npm run dev` | Servidor de desenvolvimento |
+| `npm run build` / `npm start` | Build e servidor de produção |
+| `npm test` | Testes automatizados (Vitest) |
+| `npm run typecheck` / `npm run lint` | Checagem de tipos e lint |
+| `npm run db:migrate` | Cria uma migração após mudar o `schema.prisma` e regenera o client |
+| `npm run db:deploy` | Aplica migrações pendentes (produção) |
+| `npm run db:seed` | Popula o banco |
+| `npm run db:reset` | **Apaga todos os dados** do banco de desenvolvimento, reaplica as migrações e roda o seed |
+| `npm run db:studio` | Abre o Prisma Studio |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Testes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm test
+```
+
+| Arquivo | Cobre |
+|---|---|
+| `tests/estimativa.test.ts` | Faixas por quantidade, quantidade mínima, validade vencida (e o limite do dia), sem preço aplicável, preços e fornecedores inativos, produto inativo, quantidade inválida, faixa de referência do catálogo, total da lista e ausência de dados de fornecedor no resultado |
+| `tests/autorizacao-actions.test.ts` | Chama **todas** as Server Actions sem sessão, como SOLICITANTE e como ADMIN. O banco é substituído por um objeto que falha a qualquer acesso, o que prova que a permissão é verificada antes de ler ou gravar. Toda action nova precisa ser classificada no teste |
+| `tests/autorizacao-paginas.test.ts` | Toda página da área logada chama o guard no próprio arquivo; páginas de `/admin` exigem ADMIN |
+| `tests/permissoes.test.ts` | Regras de perfil e acesso a solicitações |
+| `tests/status.test.ts` | Transições de status permitidas e bloqueadas, e quem executa cada uma |
+| `tests/formatacao-e-datas.test.ts` | BRL, dd/mm/aaaa, data de "hoje" no fuso de São Paulo e busca sem acento |
+
+## Regras de negócio implementadas
+
+- **Estimativa imediata**: considera preços ativos, de fornecedores ativos, com validade maior ou igual a hoje (fuso America/Sao_Paulo) e quantidade mínima menor ou igual à quantidade pedida. De cada fornecedor vale a faixa de maior quantidade mínima atendida. Mostra do menor ao maior total (quantidade × valor unitário) e o intervalo de prazo. Sem preço aplicável, a tela pede uma cotação formal.
+- Toda estimativa traz o aviso "Valor estimado, sujeito a confirmação pelo administrador."
+- O cálculo é feito **no servidor**: o navegador do solicitante recebe só os totais agregados, nunca os preços por fornecedor.
+- **Carrinho** = solicitação em `RASCUNHO`. Ao enviar, a estimativa de cada item fica congelada.
+- **Status**: RASCUNHO → ENVIADA → EM_ANALISE → RESPONDIDA. O solicitante cancela em RASCUNHO ou ENVIADA. As transições são protegidas contra concorrência (a gravação só acontece se o status ainda for o esperado).
+- Produtos e fornecedores são **inativados**, nunca excluídos. Os inativos saem das estimativas, mas continuam nas solicitações antigas.
+- Toda mudança de valor unitário (e o cadastro inicial) gera um registro em `HistoricoPreco`.
+- Valores monetários são guardados em **centavos (inteiros)**.
+
+As suposições feitas onde o escopo não definia o comportamento estão em [docs/SUPOSICOES.md](docs/SUPOSICOES.md).
+
+## Segurança
+
+- A permissão é verificada no servidor no início de **toda página e toda Server Action** (`exigirUsuario()` / `exigirAdmin()` em `src/lib/auth/guards.ts`), e não só escondendo botões.
+- As consultas da visão do solicitante (`src/lib/consultas/catalogo.ts`) nunca devolvem fornecedores.
+- Senhas com bcrypt (custo 12). O login não revela se o e-mail existe.
+- Sessão de 12 horas. Desativar um usuário ou redefinir a senha dele encerra as sessões ativas.
+- Em produção (`NODE_ENV=production`) o cookie de sessão é `Secure`: sirva a aplicação via **HTTPS**.
+
+## Estrutura
+
+```
+prisma/
+  schema.prisma          modelo de dados
+  migrations/            migrações versionadas
+  seed.ts                dados iniciais (credenciais vêm do .env)
+src/
+  actions/               Server Actions (cada uma começa pelo guard)
+  app/
+    login/               tela de login
+    (app)/               área logada (layout com navegação)
+      catalogo/          catálogo e detalhe com simulador
+      minha-solicitacao/ carrinho e envio formal
+      solicitacoes/      minhas solicitações e detalhe
+      admin/             painel, fila, produtos, preços, fornecedores, usuários
+  components/            componentes de interface
+  lib/
+    auth/                senha, sessão, guards e regras de permissão
+    consultas/           consultas reutilizáveis (visão do solicitante)
+    regras/              regras de negócio puras (estimativa, status)
+    validacao/           esquemas Zod
+    datas.ts, formatacao.ts
+tests/                   testes automatizados
+docs/SUPOSICOES.md       suposições registradas
+```
+
+## Produção com PostgreSQL
+
+O Prisma não permite escolher o banco por variável de ambiente. Para usar PostgreSQL:
+
+1. Em `prisma/schema.prisma`, troque `provider = "sqlite"` por `provider = "postgresql"`.
+2. Instale o adaptador: `npm install @prisma/adapter-pg` (o pacote já inclui o driver `pg`).
+3. Em `src/lib/db.ts` e `prisma/seed.ts`, troque o adaptador:
+   ```ts
+   import { PrismaPg } from "@prisma/adapter-pg";
+   const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+   ```
+4. As migrações SQL atuais são específicas do SQLite. Apague `prisma/migrations/` e gere a migração inicial apontando `DATABASE_URL` para um PostgreSQL de desenvolvimento: `npx prisma migrate dev --name init` e depois `npx prisma generate`.
+5. No servidor de produção: `npm run db:deploy`, `npm run db:seed` (uma vez), `npm run build` e `npm start`.
+
+O esquema não usa recursos exclusivos de nenhum dos dois bancos. A busca é feita na aplicação para ignorar acentos e maiúsculas da mesma forma nos dois.
+
+## Fora do escopo do MVP (e onde encaixar depois)
+
+| Evolução | Ponto de extensão |
+|---|---|
+| E-mail e notificações | Depois das transições em `src/actions/solicitacoes.ts` (envio, início da análise, resposta) |
+| SSO corporativo | Substituir `src/lib/auth/sessao.ts` e a tela de login. Os guards e as regras de permissão continuam os mesmos |
+| PDF da cotação | Gerar a partir da página `/admin/solicitacoes/[id]` |
+| Upload de imagens | Hoje `imagemUrl` é uma URL digitada pelo admin |
+| ERP, CRM, estoque, aprovação de orçamento | Não implementados |
+
+## Observações conhecidas
+
+- O login não tem limite de tentativas (rate limit). Para exposição fora da rede interna, adicione um limite no proxy reverso ou na action `entrar`.
+- Em `next.config.ts`, o cache em disco do Turbopack para `next dev` está desligado. Com ele ligado (Next 16.3.8, Windows), as rotas `/admin/produtos/[id]/precos/**` passavam a responder 404 depois de reiniciar o servidor de desenvolvimento. O build de produção não é afetado.
