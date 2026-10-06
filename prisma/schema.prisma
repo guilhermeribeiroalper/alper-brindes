@@ -1,0 +1,175 @@
+// Esquema do Catálogo de Brindes.
+// Desenvolvimento usa SQLite; para PostgreSQL troque o provider abaixo
+// e gere as migrações novamente (veja README). Evite recursos exclusivos
+// de um dos bancos. Valores monetários são inteiros em centavos.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Perfil {
+  ADMIN
+  SOLICITANTE
+}
+
+enum StatusSolicitacao {
+  RASCUNHO
+  ENVIADA
+  EM_ANALISE
+  RESPONDIDA
+  CANCELADA
+}
+
+model Usuario {
+  id           String   @id @default(cuid())
+  nome         String
+  email        String   @unique
+  senhaHash    String
+  perfil       Perfil   @default(SOLICITANTE)
+  departamento String
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  sessoes          Sessao[]
+  solicitacoes     SolicitacaoCotacao[]
+  respostas        RespostaCotacao[]
+  alteracoesPreco  HistoricoPreco[]
+}
+
+model Sessao {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  usuarioId String
+  expiraEm  DateTime
+  criadaEm  DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+}
+
+model Fornecedor {
+  id              String   @id @default(cuid())
+  nome            String
+  contatoNome     String?
+  contatoEmail    String?
+  contatoTelefone String?
+  observacoes     String?
+  ativo           Boolean  @default(true)
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  precos              PrecoFornecedor[]
+  respostasEscolhido  RespostaCotacao[]
+}
+
+model Produto {
+  id           String   @id @default(cuid())
+  nome         String
+  descricao    String?
+  categoria    String
+  imagemUrl    String?
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  precos PrecoFornecedor[]
+  itens  ItemSolicitacao[]
+
+  @@index([categoria])
+}
+
+model PrecoFornecedor {
+  id                      String   @id @default(cuid())
+  produtoId               String
+  fornecedorId            String
+  valorUnitarioCentavos   Int
+  quantidadeMinima        Int      @default(1)
+  prazoEntregaDias        Int
+  // Último dia (inclusive) em que a estimativa vale. Guardado à meia-noite UTC
+  // da data civil escolhida; comparado com a data de hoje em America/Sao_Paulo.
+  validadeEstimativa      DateTime
+  observacoes             String?
+  ativo                   Boolean  @default(true)
+  criadoEm                DateTime @default(now())
+  atualizadoEm            DateTime @updatedAt
+
+  produto    Produto          @relation(fields: [produtoId], references: [id])
+  fornecedor Fornecedor       @relation(fields: [fornecedorId], references: [id])
+  historico  HistoricoPreco[]
+
+  @@index([produtoId])
+  @@index([fornecedorId])
+}
+
+model HistoricoPreco {
+  id                      String   @id @default(cuid())
+  precoFornecedorId       String
+  valorAnteriorCentavos   Int?
+  valorNovoCentavos       Int
+  alteradoPorId           String
+  alteradoEm              DateTime @default(now())
+
+  precoFornecedor PrecoFornecedor @relation(fields: [precoFornecedorId], references: [id])
+  alteradoPor     Usuario         @relation(fields: [alteradoPorId], references: [id])
+
+  @@index([precoFornecedorId])
+}
+
+model SolicitacaoCotacao {
+  id             String            @id @default(cuid())
+  solicitanteId  String
+  departamento   String
+  dataNecessaria DateTime?
+  justificativa  String?
+  status         StatusSolicitacao @default(RASCUNHO)
+  enviadaEm      DateTime?
+  canceladaEm    DateTime?
+  criadaEm       DateTime          @default(now())
+  atualizadaEm   DateTime          @updatedAt
+
+  solicitante Usuario           @relation(fields: [solicitanteId], references: [id])
+  itens       ItemSolicitacao[]
+  resposta    RespostaCotacao?
+
+  @@index([solicitanteId, status])
+  @@index([status])
+}
+
+model ItemSolicitacao {
+  id                       String @id @default(cuid())
+  solicitacaoId            String
+  produtoId                String
+  quantidade               Int
+  // Congelados no envio; nulos enquanto RASCUNHO ou quando não há preço aplicável.
+  estimativaMinimaCentavos Int?
+  estimativaMaximaCentavos Int?
+  prazoMinDias             Int?
+  prazoMaxDias             Int?
+
+  solicitacao SolicitacaoCotacao @relation(fields: [solicitacaoId], references: [id], onDelete: Cascade)
+  produto     Produto            @relation(fields: [produtoId], references: [id])
+
+  @@unique([solicitacaoId, produtoId])
+}
+
+model RespostaCotacao {
+  id                     String   @id @default(cuid())
+  solicitacaoId          String   @unique
+  adminId                String
+  valorTotalFinalCentavos Int
+  fornecedorEscolhidoId  String?
+  prazoEntregaDias       Int
+  observacoes            String?
+  respondidaEm           DateTime @default(now())
+
+  solicitacao         SolicitacaoCotacao @relation(fields: [solicitacaoId], references: [id])
+  admin               Usuario            @relation(fields: [adminId], references: [id])
+  fornecedorEscolhido Fornecedor?        @relation(fields: [fornecedorEscolhidoId], references: [id])
+}
