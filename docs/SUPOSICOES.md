@@ -27,3 +27,8 @@ Status: **PROPOSTA** = aguardando confirmação · **CONFIRMADA** · **ALTERADA*
 | S20 | Proteção do próprio admin | O admin não pode desativar a si mesmo nem retirar o próprio perfil ADMIN, para não ficar sem nenhum administrador. | PROPOSTA |
 | S21 | Busca | A busca ignora maiúsculas e acentos e é feita na aplicação (não no banco), para o comportamento ser igual em SQLite e PostgreSQL. Adequado ao volume esperado de um catálogo interno (centenas de itens). | PROPOSTA |
 | S22 | Validade padrão | Ao cadastrar um preço, a validade sugerida é hoje + 90 dias (editável). | PROPOSTA |
+| S23 | Fluxo do admin | O admin precisa "Iniciar análise" (ENVIADA → EM_ANALISE) antes de registrar a resposta; não há atalho de ENVIADA direto para RESPONDIDA. | PROPOSTA |
+| S24 | Observações da resposta | As observações da resposta são visíveis ao solicitante; o fornecedor escolhido não é. | PROPOSTA |
+| S25 | Itens fora do catálogo | Se um produto do carrinho for desativado antes do envio, o envio fica bloqueado até o item ser removido. Em solicitações já enviadas o item permanece, marcado como "fora do catálogo". | PROPOSTA |
+| S26 | Dados do envio | A data necessária não pode ser anterior a hoje; a justificativa tem entre 10 e 2.000 caracteres. | PROPOSTA |
+| S27 | Painel | O painel destaca solicitações pendentes com data necessária em até 7 dias e mostra contagens de preços vencidos e de produtos sem preço vigente. | PROPOSTA |

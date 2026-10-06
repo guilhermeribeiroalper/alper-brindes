@@ -47,3 +47,8 @@ export function centavosParaTexto(centavos: number): string {
 export function normalizarBusca(texto: string): string {
   return texto.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().trim();
 }
+
+/** Código curto e legível de uma solicitação, ex.: #A1B2C3. */
+export function codigoSolicitacao(id: string): string {
+  return `#${id.slice(-6).toUpperCase()}`;
+}

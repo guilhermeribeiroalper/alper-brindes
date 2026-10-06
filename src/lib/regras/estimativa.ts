@@ -57,8 +57,8 @@ export function precoVigente(preco: PrecoParaEstimativa, hoje: Date): boolean {
   return situacaoPreco(preco, hoje) === "VIGENTE";
 }
 
-/** Escolhe, por fornecedor, a faixa aplicável à quantidade. */
-function faixasAplicaveis(precos: PrecoParaEstimativa[], quantidade: number, hoje: Date) {
+/** Escolhe, por fornecedor, a faixa aplicável à quantidade. Uso interno e na tela do ADMIN. */
+export function faixasAplicaveis(precos: PrecoParaEstimativa[], quantidade: number, hoje: Date) {
   const porFornecedor = new Map<string, PrecoParaEstimativa>();
   for (const p of precos) {
     if (!precoVigente(p, hoje) || p.quantidadeMinima > quantidade) continue;
@@ -138,4 +138,29 @@ export function faixaReferencia(
     unitarioMaximoCentavos: Math.max(...valores),
     quantidadeMinima: Math.min(...vigentes.map((p) => p.quantidadeMinima)),
   };
+}
+
+export type TotalEstimado = {
+  totalMinimoCentavos: number;
+  totalMaximoCentavos: number;
+  /** Itens com estimativa (entram no total). */
+  itensComPreco: number;
+  /** Itens sem preço aplicável (exigem cotação formal; fora do total). */
+  itensSemPreco: number;
+};
+
+/** Soma as estimativas de uma lista de itens. Itens sem preço não entram no total (S6). */
+export function somarEstimativas(
+  itens: { minimoCentavos: number | null; maximoCentavos: number | null }[],
+): TotalEstimado {
+  let totalMinimoCentavos = 0;
+  let totalMaximoCentavos = 0;
+  let itensComPreco = 0;
+  for (const item of itens) {
+    if (item.minimoCentavos === null || item.maximoCentavos === null) continue;
+    totalMinimoCentavos += item.minimoCentavos;
+    totalMaximoCentavos += item.maximoCentavos;
+    itensComPreco++;
+  }
+  return { totalMinimoCentavos, totalMaximoCentavos, itensComPreco, itensSemPreco: itens.length - itensComPreco };
 }
