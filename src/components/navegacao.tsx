@@ -23,7 +23,7 @@ function estaAtivo(caminho: string, href: string) {
   return href === "/admin" ? caminho === "/admin" : caminho === href || caminho.startsWith(`${href}/`);
 }
 
-function ItemMenu({ href, rotulo, caminho }: { href: string; rotulo: string; caminho: string }) {
+function ItemMenu({ href, rotulo, caminho, contador }: { href: string; rotulo: string; caminho: string; contador?: number }) {
   const atual = estaAtivo(caminho, href);
   return (
     <Link
@@ -34,18 +34,23 @@ function ItemMenu({ href, rotulo, caminho }: { href: string; rotulo: string; cam
       }`}
     >
       {rotulo}
+      {!!contador && (
+        <span className="ml-1.5 rounded-full bg-white px-1.5 py-0.5 text-xs font-semibold text-marca-800" aria-label={`${contador} itens`}>
+          {contador}
+        </span>
+      )}
     </Link>
   );
 }
 
-export function Navegacao({ nome, perfil }: { nome: string; perfil: Perfil }) {
+export function Navegacao({ nome, perfil, itensCarrinho }: { nome: string; perfil: Perfil; itensCarrinho: number }) {
   const caminho = usePathname();
   const admin = perfil === "ADMIN";
 
   const menu = (
     <>
       {LINKS_TODOS.map((l) => (
-        <ItemMenu key={l.href} {...l} caminho={caminho} />
+        <ItemMenu key={l.href} {...l} caminho={caminho} contador={l.href === "/minha-solicitacao" ? itensCarrinho : undefined} />
       ))}
       {admin && <span className="mx-2 hidden h-6 w-px bg-marca-600 lg:block" aria-hidden />}
       {admin && LINKS_ADMIN.map((l) => <ItemMenu key={l.href} {...l} caminho={caminho} />)}
