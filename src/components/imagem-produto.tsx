@@ -1,21 +1,36 @@
-/** Foto do produto (URL externa cadastrada pelo admin) ou um marcador com as iniciais. */
-export function ImagemProduto({ url, nome, className = "" }: { url: string | null; nome: string; className?: string }) {
-  if (!url) {
-    const iniciais = nome
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((p) => p[0]?.toUpperCase())
-      .join("");
-    return (
-      <div
-        className={`grafismo-claro flex items-center justify-center bg-surface-alt font-display text-3xl font-bold text-brand-navy ${className}`}
-        aria-hidden
-      >
-        {iniciais}
-      </div>
-    );
-  }
-  // <img> em vez de next/image: as URLs são de domínios arbitrários cadastrados pelo admin.
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={url} alt={nome} loading="lazy" className={`bg-surface-alt object-cover ${className}`} />;
+import { imagemPadraoProduto } from "@/lib/imagens";
+
+/**
+ * Foto do produto (URL externa cadastrada pelo admin). Sem foto, mostra uma imagem
+ * ilustrativa padrão, sinalizada como tal.
+ */
+export function ImagemProduto({
+  id,
+  url,
+  nome,
+  className = "",
+}: {
+  id: string;
+  url: string | null;
+  nome: string;
+  className?: string;
+}) {
+  const ilustrativa = !url;
+  return (
+    <div className={`relative overflow-hidden bg-surface-alt ${className}`}>
+      {/* <img> em vez de next/image: as URLs cadastradas são de domínios arbitrários. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url ?? imagemPadraoProduto(id)}
+        alt={ilustrativa ? "" : nome}
+        loading="lazy"
+        className="size-full object-cover"
+      />
+      {ilustrativa && (
+        <span className="absolute bottom-2 left-2 rounded-sm bg-surface-brand/85 px-2 py-0.5 text-[11px] font-semibold text-on-brand">
+          Imagem ilustrativa
+        </span>
+      )}
+    </div>
+  );
 }

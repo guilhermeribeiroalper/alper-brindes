@@ -24,7 +24,7 @@ export default async function DetalheProduto(props: PageProps<"/catalogo/[id]">)
         </Link>
       </p>
       <div className="grid gap-8 lg:grid-cols-2">
-        <ImagemProduto url={produto.imagemUrl} nome={produto.nome} className="aspect-[4/3] w-full rounded-lg border border-border" />
+        <ImagemProduto id={produto.id} url={produto.imagemUrl} nome={produto.nome} className="aspect-[4/3] w-full rounded-lg border border-border" />
         <div className="space-y-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-interactive-hover">{produto.categoria}</p>
