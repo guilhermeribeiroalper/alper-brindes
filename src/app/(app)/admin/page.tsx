@@ -9,7 +9,7 @@ import { codigoSolicitacao, formatarData, formatarDataHora } from "@/lib/formata
 export const metadata = { title: "Painel · Catálogo de Brindes" };
 
 function Indicador({ rotulo, valor, href, destaque }: { rotulo: string; valor: number; href: string; destaque?: boolean }) {
-  // Pendência com valor: card na cor da marca, com grafismo.
+  // Pendência com valor: card na cor da marca.
   const marca = destaque && valor > 0;
   return (
     <Link
@@ -20,7 +20,6 @@ function Indicador({ rotulo, valor, href, destaque }: { rotulo: string; valor: n
           : `${estilos.cartao} block p-5 transition hover:border-brand-navy hover:shadow-md`
       }
     >
-      {marca && <div className="grafismo pointer-events-none absolute inset-y-0 right-0 w-1/2 opacity-60" aria-hidden />}
       <p className={`relative text-sm font-semibold ${marca ? "text-on-brand/85" : "text-on-surface-muted"}`}>{rotulo}</p>
       <p className="relative mt-2 font-display text-4xl leading-none font-bold">{valor}</p>
     </Link>

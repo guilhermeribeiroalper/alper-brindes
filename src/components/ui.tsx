@@ -108,7 +108,7 @@ export function Titulo({ children, acoes }: { children: ReactNode; acoes?: React
     <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
       <div>
         <h1 className="font-display text-[28px] leading-[1.2] font-semibold text-on-surface">{children}</h1>
-        {/* Traço decorativo em accent, derivado do grafismo da marca */}
+        {/* Traço decorativo em accent */}
         <span className="mt-2 block h-1 w-12 rounded-pill bg-accent" aria-hidden />
       </div>
       {acoes && <div className="flex flex-wrap gap-2">{acoes}</div>}

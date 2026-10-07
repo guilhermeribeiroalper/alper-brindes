@@ -105,8 +105,6 @@ export function Navegacao({ nome, perfil, itensCarrinho }: { nome: string; perfi
 
   return (
     <header className="sobre-marca relative overflow-hidden bg-surface-brand text-on-brand">
-      {/* Grafismo Alper à direita do cabeçalho */}
-      <div className="grafismo pointer-events-none absolute inset-y-0 right-0 w-1/3 opacity-70" aria-hidden />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="flex items-center justify-between gap-4 py-4">

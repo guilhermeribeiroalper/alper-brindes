@@ -55,20 +55,6 @@
   --font-display: "Pluto", var(--font-montserrat), system-ui, sans-serif;
 }
 
-/* Grafismo Alper: reticulado de linhas diagonais finas (1px) em lime sobre áreas da cor da marca. */
-@utility grafismo {
-  background-image:
-    repeating-linear-gradient(60deg, rgb(125 237 138 / 0.32) 0 1px, transparent 1px 28px),
-    repeating-linear-gradient(-60deg, rgb(125 237 138 / 0.2) 0 1px, transparent 1px 28px);
-}
-
-/* Variante sutil (navy) para áreas claras, como o marcador de imagem do produto. */
-@utility grafismo-claro {
-  background-image:
-    repeating-linear-gradient(60deg, rgb(0 79 148 / 0.08) 0 1px, transparent 1px 24px),
-    repeating-linear-gradient(-60deg, rgb(0 79 148 / 0.06) 0 1px, transparent 1px 24px);
-}
-
 body {
   background: var(--color-surface-alt);
   color: var(--color-on-surface);

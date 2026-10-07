@@ -98,10 +98,10 @@ As suposições feitas onde o escopo não definia o comportamento estão em [doc
 
 ## Identidade visual
 
-A interface segue o **Alper Design System** (tokens, tipografia e grafismo). Os tokens estão em `src/app/globals.css`, com os mesmos nomes do `tokens.json` do design system. Exemplos: `brand-navy`, `surface`, `on-surface`, `accent`, `radius-md`, `shadow-sm`. Os componentes base ficam em `src/components/ui.tsx`.
+A interface segue o **Alper Design System** (tokens e tipografia). Os tokens estão em `src/app/globals.css`, com os mesmos nomes do `tokens.json` do design system. Exemplos: `brand-navy`, `surface`, `on-surface`, `accent`, `radius-md`, `shadow-sm`. Os componentes base ficam em `src/components/ui.tsx`.
 
 - **Tipografia:** Montserrat, carregada pelo `next/font`. Pluto, a fonte de títulos, é proprietária e não vem incluída. Se for instalada, entra antes da Montserrat na pilha `font-display`.
-- **Grafismo:** utilitário `grafismo`, com linhas diagonais de 1px em lime sobre áreas navy (cabeçalho, resultado da estimativa, indicadores do painel).
+- **Grafismo:** o reticulado de linhas diagonais do design system não é usado na interface (decisão de produto). Restam só os traços lime curtos sob os títulos.
 - **Imagens ilustrativas:** produto sem foto cadastrada mostra uma de seis imagens padrão (`public/imagens/produtos/`, todas CC0), escolhida pelo id do produto. A escolha é estável e a imagem leva o selo "Imagem ilustrativa". Para mudar a lista, edite `src/lib/imagens.ts`. Os créditos estão em [docs/CREDITOS-IMAGENS.md](docs/CREDITOS-IMAGENS.md).
 - **Foto do login:** `public/imagens/login-presentes.jpg`, "Brown gift box with red ribbon and bow", de Shixart1985, via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Brown_gift_box_with_red_ribbon_and_bow.jpg). A licença é [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) e exige o crédito, que aparece na própria tela. A foto não recebe o overlay de grafismo que o design system pede para fotografias: foi uma escolha de layout. Para trocar, substitua o arquivo e atualize o crédito em `src/app/login/page.tsx`.
 - **Logotipo:** o design system não traz o arquivo oficial. Por isso, a marca aparece só como texto ("alper"). Para usar o logo oficial, troque o componente `Marca` em `src/components/navegacao.tsx`, respeitando a área de proteção e o tamanho mínimo de 200px.

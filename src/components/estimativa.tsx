@@ -53,7 +53,6 @@ export function ResultadoEstimativa({ estimativa }: { estimativa: Estimativa }) 
       role="status"
       aria-live="polite"
     >
-      <div className="grafismo pointer-events-none absolute inset-y-0 right-0 w-1/2 opacity-60" aria-hidden />
       <div className="relative">
         <p className="text-xs font-semibold tracking-wide text-on-brand/80 uppercase">
           Estimativa para {estimativa.quantidade.toLocaleString("pt-BR")} un.
