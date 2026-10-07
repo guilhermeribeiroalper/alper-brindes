@@ -73,9 +73,9 @@ function ItemMovel({ href, rotulo, caminho, contador }: { href: string; rotulo: 
 
 function Marca() {
   return (
-    <Link href="/" className="flex shrink-0 items-center gap-5">
+    <Link href="/" className="flex shrink-0 items-center gap-4">
       <LogoAlper prioridade />
-      <span className="hidden h-10 w-px bg-on-brand/30 sm:block" aria-hidden />
+      <span className="hidden h-6 w-px bg-on-brand/30 sm:block" aria-hidden />
       <span className="hidden text-base font-semibold text-on-brand/90 sm:inline">Catálogo de Brindes</span>
     </Link>
   );
