@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { sair } from "@/actions/auth";
+import { LogoAlper } from "@/components/logo-alper";
 import type { Perfil } from "@/lib/auth/permissoes";
 
 const LINKS_TODOS = [
@@ -71,12 +72,11 @@ function ItemMovel({ href, rotulo, caminho, contador }: { href: string; rotulo: 
 }
 
 function Marca() {
-  // Sem o arquivo oficial do logotipo no design system: identificação em texto.
   return (
-    <Link href="/" className="flex shrink-0 items-baseline gap-3">
-      <span className="font-display text-2xl leading-none font-bold tracking-tight lowercase">alper</span>
-      <span className="hidden h-5 w-px self-center bg-on-brand/30 sm:block" aria-hidden />
-      <span className="hidden text-sm font-semibold text-on-brand/85 sm:inline">Catálogo de Brindes</span>
+    <Link href="/" className="flex shrink-0 items-center gap-5">
+      <LogoAlper prioridade />
+      <span className="hidden h-10 w-px bg-on-brand/30 sm:block" aria-hidden />
+      <span className="hidden text-base font-semibold text-on-brand/90 sm:inline">Catálogo de Brindes</span>
     </Link>
   );
 }

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { obterUsuarioAtual } from "@/lib/auth/sessao";
+import { LogoAlper } from "@/components/logo-alper";
 import { FormLogin } from "./form-login";
 
 export const metadata = { title: "Entrar · Catálogo de Brindes" };
@@ -25,8 +26,7 @@ export default async function PaginaLogin() {
         />
 
         <div className="relative">
-          <p className="font-display text-4xl leading-none font-bold tracking-tight lowercase">alper</p>
-          <p className="mt-2 text-xs tracking-[0.08em] text-on-brand/85 lowercase">alta performance em seguros</p>
+          <LogoAlper prioridade />
         </div>
 
         <div className="relative mt-16 max-w-md">
