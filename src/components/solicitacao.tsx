@@ -39,7 +39,7 @@ export function ItensCongelados({ itens, linkProduto }: { itens: ItemCongelado[]
   return (
     <div className={`${estilos.cartao} overflow-x-auto`}>
       <table className={estilos.tabela}>
-        <thead className="bg-slate-50">
+        <thead className="bg-surface-alt">
           <tr>
             <th className={estilos.th}>Produto</th>
             <th className={`${estilos.th} text-right`}>Qtd.</th>
@@ -47,7 +47,7 @@ export function ItensCongelados({ itens, linkProduto }: { itens: ItemCongelado[]
             <th className={estilos.th}>Prazo estimado</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-border">
           {itens.map((i) => (
             <tr key={i.id}>
               <td className={estilos.td}>
@@ -58,14 +58,14 @@ export function ItensCongelados({ itens, linkProduto }: { itens: ItemCongelado[]
                 ) : (
                   i.produto.nome
                 )}
-                {!i.produto.ativo && <span className="ml-2 text-xs text-slate-500">(fora do catálogo)</span>}
+                {!i.produto.ativo && <span className="ml-2 text-xs text-on-surface-muted">(fora do catálogo)</span>}
               </td>
               <td className={`${estilos.td} text-right tabular-nums`}>{i.quantidade.toLocaleString("pt-BR")}</td>
               <td className={estilos.td}>
                 {i.estimativaMinimaCentavos !== null && i.estimativaMaximaCentavos !== null ? (
                   <FaixaTotal minimo={i.estimativaMinimaCentavos} maximo={i.estimativaMaximaCentavos} />
                 ) : (
-                  <span className="text-amber-700">Requer cotação formal</span>
+                  <span className="font-semibold text-on-surface">Requer cotação formal</span>
                 )}
               </td>
               <td className={estilos.td}>
@@ -74,7 +74,7 @@ export function ItensCongelados({ itens, linkProduto }: { itens: ItemCongelado[]
             </tr>
           ))}
         </tbody>
-        <tfoot className="bg-slate-50">
+        <tfoot className="bg-surface-alt">
           <tr>
             <td className={`${estilos.td} font-semibold`} colSpan={2}>
               Total estimado
@@ -86,7 +86,7 @@ export function ItensCongelados({ itens, linkProduto }: { itens: ItemCongelado[]
                 "—"
               )}
               {total.itensSemPreco > 0 && (
-                <span className="block text-xs font-normal text-amber-700">
+                <span className="block text-xs font-normal text-on-surface-muted">
                   {total.itensSemPreco === 1
                     ? "1 item sem preço de referência não entra no total."
                     : `${total.itensSemPreco} itens sem preço de referência não entram no total.`}

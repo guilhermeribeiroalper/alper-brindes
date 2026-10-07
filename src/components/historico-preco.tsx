@@ -11,13 +11,13 @@ export type LinhaHistorico = {
 };
 
 export function HistoricoPreco({ linhas }: { linhas: LinhaHistorico[] }) {
-  if (linhas.length === 0) return <p className="text-sm text-slate-500">Nenhuma alteração registrada.</p>;
+  if (linhas.length === 0) return <p className="text-sm text-on-surface-muted">Nenhuma alteração registrada.</p>;
   const mostrarPreco = linhas.some((l) => l.precoFornecedor);
 
   return (
     <div className={`${estilos.cartao} overflow-x-auto`}>
       <table className={estilos.tabela}>
-        <thead className="bg-slate-50">
+        <thead className="bg-surface-alt">
           <tr>
             <th className={estilos.th}>Quando</th>
             {mostrarPreco && <th className={estilos.th}>Faixa</th>}
@@ -26,7 +26,7 @@ export function HistoricoPreco({ linhas }: { linhas: LinhaHistorico[] }) {
             <th className={estilos.th}>Alterado por</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-border">
           {linhas.map((l) => (
             <tr key={l.id}>
               <td className={`${estilos.td} whitespace-nowrap`}>{formatarDataHora(l.alteradoEm)}</td>
@@ -38,7 +38,7 @@ export function HistoricoPreco({ linhas }: { linhas: LinhaHistorico[] }) {
                 </td>
               )}
               <td className={estilos.td}>
-                {l.valorAnteriorCentavos === null ? <span className="text-slate-500">Cadastro inicial</span> : formatarBRL(l.valorAnteriorCentavos)}
+                {l.valorAnteriorCentavos === null ? <span className="text-on-surface-muted">Cadastro inicial</span> : formatarBRL(l.valorAnteriorCentavos)}
               </td>
               <td className={`${estilos.td} font-medium`}>{formatarBRL(l.valorNovoCentavos)}</td>
               <td className={estilos.td}>{l.alteradoPor.nome}</td>

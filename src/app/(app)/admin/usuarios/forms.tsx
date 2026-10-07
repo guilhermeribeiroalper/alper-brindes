@@ -71,7 +71,7 @@ export function FormRedefinirSenha({ usuarioId }: { usuarioId: string }) {
 
   return (
     <details>
-      <summary className="cursor-pointer text-xs text-marca-600 hover:underline">Redefinir senha</summary>
+      <summary className="cursor-pointer text-xs text-brand-navy hover:underline">Redefinir senha</summary>
       <form action={acao} className="mt-2 flex flex-col gap-2">
         <input type="hidden" name="usuarioId" value={usuarioId} />
         <label className="sr-only" htmlFor={`senha-${usuarioId}`}>
@@ -90,8 +90,8 @@ export function FormRedefinirSenha({ usuarioId }: { usuarioId: string }) {
         <button type="submit" disabled={pendente} className={estilos.botaoPequeno}>
           {pendente ? "Salvando…" : "Salvar senha"}
         </button>
-        {erro && !estado?.sucesso && <p className="text-xs text-red-600">{erro}</p>}
-        {estado?.sucesso && <p className="text-xs text-emerald-700">{estado.sucesso}</p>}
+        {erro && !estado?.sucesso && <p className="text-xs text-error">{erro}</p>}
+        {estado?.sucesso && <p className="text-xs text-on-surface">{estado.sucesso}</p>}
       </form>
     </details>
   );

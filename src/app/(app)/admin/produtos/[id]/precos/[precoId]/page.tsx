@@ -53,12 +53,12 @@ export default async function EditarPreco(props: PageProps<"/admin/produtos/[id]
             observacoes: preco.observacoes,
           }}
         />
-        <p className="mt-4 text-xs text-slate-500">
+        <p className="mt-4 text-xs text-on-surface-muted">
           Mudanças no valor unitário ficam registradas no histórico abaixo.
         </p>
       </section>
 
-      <h2 className="mb-3 text-lg font-semibold">Histórico desta faixa</h2>
+      <h2 className="mb-3 font-display text-xl font-semibold text-on-surface">Histórico desta faixa</h2>
       <HistoricoPreco linhas={preco.historico} />
     </>
   );

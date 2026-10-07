@@ -38,7 +38,7 @@ export default async function MinhasSolicitacoes() {
       ) : (
         <div className={`${estilos.cartao} overflow-x-auto`}>
           <table className={estilos.tabela}>
-            <thead className="bg-slate-50">
+            <thead className="bg-surface-alt">
               <tr>
                 <th className={estilos.th}>Solicitação</th>
                 <th className={estilos.th}>Enviada em</th>
@@ -48,7 +48,7 @@ export default async function MinhasSolicitacoes() {
                 <th className={estilos.th}>Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {solicitacoes.map((s) => {
                 const total = somarEstimativas(
                   s.itens.map((i) => ({ minimoCentavos: i.estimativaMinimaCentavos, maximoCentavos: i.estimativaMaximaCentavos })),
@@ -56,7 +56,7 @@ export default async function MinhasSolicitacoes() {
                 return (
                   <tr key={s.id}>
                     <td className={estilos.td}>
-                      <Link href={`/solicitacoes/${s.id}`} className={`${estilos.link} font-mono`}>
+                      <Link href={`/solicitacoes/${s.id}`} className={`${estilos.link} tabular-nums`}>
                         {codigoSolicitacao(s.id)}
                       </Link>
                     </td>
@@ -67,11 +67,11 @@ export default async function MinhasSolicitacoes() {
                       {s.resposta ? (
                         <span className="font-medium">{formatarBRL(s.resposta.valorTotalFinalCentavos)}</span>
                       ) : total.itensComPreco > 0 ? (
-                        <span className="text-slate-600">
+                        <span className="text-on-surface">
                           Est. <FaixaTotal minimo={total.totalMinimoCentavos} maximo={total.totalMaximoCentavos} />
                         </span>
                       ) : (
-                        <span className="text-slate-500">Sob cotação</span>
+                        <span className="text-on-surface-muted">Sob cotação</span>
                       )}
                     </td>
                     <td className={estilos.td}>

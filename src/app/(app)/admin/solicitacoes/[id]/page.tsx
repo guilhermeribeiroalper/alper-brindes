@@ -75,7 +75,7 @@ export default async function DetalheSolicitacaoAdmin(props: PageProps<"/admin/s
           )
         }
       >
-        Solicitação <span className="font-mono">{codigoSolicitacao(solicitacao.id)}</span>{" "}
+        Solicitação <span className="tabular-nums">{codigoSolicitacao(solicitacao.id)}</span>{" "}
         <SeloStatus status={solicitacao.status} />
       </Titulo>
 
@@ -89,53 +89,53 @@ export default async function DetalheSolicitacaoAdmin(props: PageProps<"/admin/s
 
       <dl className={`${estilos.cartao} mb-6 grid gap-4 p-5 text-sm sm:grid-cols-4`}>
         <div>
-          <dt className="text-xs text-slate-500">Solicitante</dt>
+          <dt className="text-xs text-on-surface-muted">Solicitante</dt>
           <dd>
             {solicitacao.solicitante.nome}
-            <span className="block text-xs text-slate-500">{solicitacao.solicitante.email}</span>
+            <span className="block text-xs text-on-surface-muted">{solicitacao.solicitante.email}</span>
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Departamento</dt>
+          <dt className="text-xs text-on-surface-muted">Departamento</dt>
           <dd>{solicitacao.departamento}</dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Enviada em</dt>
+          <dt className="text-xs text-on-surface-muted">Enviada em</dt>
           <dd>{solicitacao.enviadaEm ? formatarDataHora(solicitacao.enviadaEm) : "—"}</dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Necessária em</dt>
+          <dt className="text-xs text-on-surface-muted">Necessária em</dt>
           <dd>{solicitacao.dataNecessaria ? formatarData(solicitacao.dataNecessaria) : "—"}</dd>
         </div>
         {solicitacao.justificativa && (
           <div className="sm:col-span-4">
-            <dt className="text-xs text-slate-500">Justificativa</dt>
+            <dt className="text-xs text-on-surface-muted">Justificativa</dt>
             <dd className="whitespace-pre-line">{solicitacao.justificativa}</dd>
           </div>
         )}
       </dl>
 
-      <h2 className="mb-3 text-lg font-semibold">Itens e estimativas congeladas no envio</h2>
+      <h2 className="mb-3 font-display text-xl font-semibold text-on-surface">Itens e estimativas congeladas no envio</h2>
       <ItensCongelados itens={solicitacao.itens} linkProduto={(produtoId) => `/admin/produtos/${produtoId}/precos`} />
 
       {solicitacao.status !== "CANCELADA" && solicitacao.status !== "RESPONDIDA" && (
         <>
-          <h2 className="mb-3 mt-8 text-lg font-semibold">Preços vigentes hoje por fornecedor</h2>
+          <h2 className="mb-3 mt-8 font-display text-xl font-semibold text-on-surface">Preços vigentes hoje por fornecedor</h2>
           <div className="space-y-3">
             {referencias.map(({ item, opcoes }) => (
               <div key={item.id} className={`${estilos.cartao} p-4`}>
                 <p className="font-medium">
-                  {item.produto.nome} <span className="font-normal text-slate-500">· {item.quantidade.toLocaleString("pt-BR")} un.</span>
+                  {item.produto.nome} <span className="font-normal text-on-surface-muted">· {item.quantidade.toLocaleString("pt-BR")} un.</span>
                 </p>
                 {opcoes.length === 0 ? (
-                  <p className="mt-1 text-sm text-amber-700">Nenhum preço vigente para esta quantidade.</p>
+                  <p className="mt-1 text-sm font-semibold text-on-surface">Nenhum preço vigente para esta quantidade.</p>
                 ) : (
-                  <ul className="mt-2 divide-y divide-slate-100 text-sm">
+                  <ul className="mt-2 divide-y divide-border text-sm">
                     {opcoes.map((o) => (
                       <li key={o.fornecedorId} className="flex flex-wrap justify-between gap-2 py-1.5">
                         <span>
                           {o.fornecedor}{" "}
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-on-surface-muted">
                             (faixa a partir de {o.quantidadeMinima} un., {o.prazoEntregaDias} dias)
                           </span>
                         </span>
@@ -161,29 +161,29 @@ export default async function DetalheSolicitacaoAdmin(props: PageProps<"/admin/s
 
       {solicitacao.status === "EM_ANALISE" && (
         <section className={`${estilos.cartao} mt-8 p-6`}>
-          <h2 className="mb-4 text-lg font-semibold">Registrar resposta</h2>
+          <h2 className="mb-4 font-display text-xl font-semibold text-on-surface">Registrar resposta</h2>
           <FormResposta solicitacaoId={solicitacao.id} fornecedores={fornecedores} />
         </section>
       )}
 
       {solicitacao.resposta && (
-        <section className="mt-8 rounded-lg border border-emerald-200 bg-emerald-50 p-5">
-          <h2 className="text-lg font-semibold text-emerald-900">Resposta registrada</h2>
+        <section className="mt-8 rounded-lg border border-success/50 bg-success/10 p-5">
+          <h2 className="font-display text-xl font-semibold text-on-surface">Resposta registrada</h2>
           <dl className="mt-3 grid gap-4 text-sm sm:grid-cols-4">
             <div>
-              <dt className="text-xs text-emerald-800">Valor total final</dt>
+              <dt className="text-xs text-on-surface">Valor total final</dt>
               <dd className="text-xl font-semibold">{formatarBRL(solicitacao.resposta.valorTotalFinalCentavos)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-emerald-800">Fornecedor escolhido</dt>
+              <dt className="text-xs text-on-surface">Fornecedor escolhido</dt>
               <dd>{solicitacao.resposta.fornecedorEscolhido?.nome ?? "Não informado"}</dd>
             </div>
             <div>
-              <dt className="text-xs text-emerald-800">Prazo de entrega</dt>
+              <dt className="text-xs text-on-surface">Prazo de entrega</dt>
               <dd>{solicitacao.resposta.prazoEntregaDias} dias</dd>
             </div>
             <div>
-              <dt className="text-xs text-emerald-800">Respondida por</dt>
+              <dt className="text-xs text-on-surface">Respondida por</dt>
               <dd>
                 {solicitacao.resposta.admin.nome}
                 <span className="block text-xs">{formatarDataHora(solicitacao.resposta.respondidaEm)}</span>

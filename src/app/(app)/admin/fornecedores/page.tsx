@@ -31,7 +31,7 @@ export default async function PaginaFornecedores() {
       ) : (
         <div className={`${estilos.cartao} overflow-x-auto`}>
           <table className={estilos.tabela}>
-            <thead className="bg-slate-50">
+            <thead className="bg-surface-alt">
               <tr>
                 <th className={estilos.th}>Nome</th>
                 <th className={estilos.th}>Contato</th>
@@ -39,9 +39,9 @@ export default async function PaginaFornecedores() {
                 <th className={estilos.th}>Situação</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {fornecedores.map((f) => (
-                <tr key={f.id} className={f.ativo ? "" : "text-slate-500"}>
+                <tr key={f.id} className={f.ativo ? "" : "text-on-surface-muted"}>
                   <td className={estilos.td}>
                     <Link href={`/admin/fornecedores/${f.id}`} className={estilos.link}>
                       {f.nome}
@@ -49,7 +49,7 @@ export default async function PaginaFornecedores() {
                   </td>
                   <td className={estilos.td}>
                     <p>{f.contatoNome ?? "—"}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-on-surface-muted">
                       {[f.contatoEmail, f.contatoTelefone].filter(Boolean).join(" · ")}
                     </p>
                   </td>

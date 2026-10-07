@@ -48,7 +48,7 @@ export function Simulador({
       <input type="hidden" name="produtoId" value={produtoId} />
       <input type="hidden" name="quantidade" value={quantidade} />
       <div>
-        <label htmlFor="quantidade-simulador" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="quantidade-simulador" className="block text-sm font-medium text-on-surface">
           Quantidade
         </label>
         <div className="mt-1 flex items-center gap-3">
@@ -62,7 +62,7 @@ export function Simulador({
             onChange={(e) => setQuantidade(e.target.value)}
             className={`${estilos.input} w-40`}
           />
-          {calculando && <span className="text-xs text-slate-500">Calculando…</span>}
+          {calculando && <span className="text-xs text-on-surface-muted">Calculando…</span>}
         </div>
       </div>
 

@@ -54,7 +54,7 @@ export default async function PaginaProdutos(props: PageProps<"/admin/produtos">
       ) : (
         <div className={`${estilos.cartao} overflow-x-auto`}>
           <table className={estilos.tabela}>
-            <thead className="bg-slate-50">
+            <thead className="bg-surface-alt">
               <tr>
                 <th className={estilos.th}>Produto</th>
                 <th className={estilos.th}>Categoria</th>
@@ -63,13 +63,13 @@ export default async function PaginaProdutos(props: PageProps<"/admin/produtos">
                 <th className={estilos.th}>Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {produtos.map((p) => {
                 const vigentes = p.precos.filter(
                   (pr) => pr.ativo && pr.fornecedor.ativo && pr.validadeEstimativa >= hoje,
                 ).length;
                 return (
-                  <tr key={p.id} className={p.ativo ? "" : "text-slate-500"}>
+                  <tr key={p.id} className={p.ativo ? "" : "text-on-surface-muted"}>
                     <td className={estilos.td}>
                       <Link href={`/admin/produtos/${p.id}`} className={estilos.link}>
                         {p.nome}

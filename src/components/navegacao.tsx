@@ -23,22 +23,60 @@ function estaAtivo(caminho: string, href: string) {
   return href === "/admin" ? caminho === "/admin" : caminho === href || caminho.startsWith(`${href}/`);
 }
 
-function ItemMenu({ href, rotulo, caminho, contador }: { href: string; rotulo: string; caminho: string; contador?: number }) {
+function Contador({ valor }: { valor: number }) {
+  return (
+    <span
+      className="ml-2 inline-flex min-w-5 justify-center rounded-pill bg-brand-lime px-1.5 py-0.5 text-xs font-bold text-brand-navy"
+      aria-label={`${valor} ${valor === 1 ? "item" : "itens"}`}
+    >
+      {valor}
+    </span>
+  );
+}
+
+/** Aba da barra (telas grandes): página atual marcada com traço em accent. */
+function Aba({ href, rotulo, caminho, contador }: { href: string; rotulo: string; caminho: string; contador?: number }) {
   const atual = estaAtivo(caminho, href);
   return (
     <Link
       href={href}
       aria-current={atual ? "page" : undefined}
-      className={`block rounded-md px-3 py-2 text-sm font-medium ${
-        atual ? "bg-marca-700 text-white" : "text-marca-50 hover:bg-marca-700/60"
+      className={`relative inline-flex items-center px-3 py-3 text-sm font-semibold transition-colors ${
+        atual ? "text-on-brand" : "text-on-brand/75 hover:text-on-brand"
       }`}
     >
       {rotulo}
-      {!!contador && (
-        <span className="ml-1.5 rounded-full bg-white px-1.5 py-0.5 text-xs font-semibold text-marca-800" aria-label={`${contador} itens`}>
-          {contador}
-        </span>
-      )}
+      {!!contador && <Contador valor={contador} />}
+      {atual && <span className="absolute inset-x-3 bottom-0 h-[3px] rounded-t-sm bg-accent" aria-hidden />}
+    </Link>
+  );
+}
+
+/** Item do menu recolhível (telas pequenas). */
+function ItemMovel({ href, rotulo, caminho, contador }: { href: string; rotulo: string; caminho: string; contador?: number }) {
+  const atual = estaAtivo(caminho, href);
+  return (
+    <Link
+      href={href}
+      aria-current={atual ? "page" : undefined}
+      className={`flex items-center rounded-md px-3 py-2 text-sm font-semibold ${
+        atual ? "bg-on-brand/10 text-on-brand" : "text-on-brand/80 hover:bg-on-brand/10"
+      }`}
+    >
+      {atual && <span className="mr-2 size-2 rounded-pill bg-accent" aria-hidden />}
+      {rotulo}
+      {!!contador && <Contador valor={contador} />}
+    </Link>
+  );
+}
+
+function Marca() {
+  // Sem o arquivo oficial do logotipo no design system: identificação em texto.
+  return (
+    <Link href="/" className="flex shrink-0 items-baseline gap-3">
+      <span className="font-display text-2xl leading-none font-bold tracking-tight lowercase">alper</span>
+      <span className="hidden h-5 w-px self-center bg-on-brand/30 sm:block" aria-hidden />
+      <span className="hidden text-sm font-semibold text-on-brand/85 sm:inline">Catálogo de Brindes</span>
     </Link>
   );
 }
@@ -46,26 +84,19 @@ function ItemMenu({ href, rotulo, caminho, contador }: { href: string; rotulo: s
 export function Navegacao({ nome, perfil, itensCarrinho }: { nome: string; perfil: Perfil; itensCarrinho: number }) {
   const caminho = usePathname();
   const admin = perfil === "ADMIN";
-
-  const menu = (
-    <>
-      {LINKS_TODOS.map((l) => (
-        <ItemMenu key={l.href} {...l} caminho={caminho} contador={l.href === "/minha-solicitacao" ? itensCarrinho : undefined} />
-      ))}
-      {admin && <span className="mx-2 hidden h-6 w-px bg-marca-600 lg:block" aria-hidden />}
-      {admin && LINKS_ADMIN.map((l) => <ItemMenu key={l.href} {...l} caminho={caminho} />)}
-    </>
-  );
+  const contadorDe = (href: string) => (href === "/minha-solicitacao" ? itensCarrinho : undefined);
 
   const usuario = (
     <form action={sair} className="flex items-center gap-3">
-      <span className="text-sm text-marca-100">
+      <span className="text-sm text-on-brand/85">
         {nome}
-        {admin && <span className="ml-2 rounded bg-marca-600 px-1.5 py-0.5 text-xs text-white">Admin</span>}
+        {admin && (
+          <span className="ml-2 rounded-sm bg-brand-royal px-1.5 py-0.5 text-xs font-semibold text-on-brand">Admin</span>
+        )}
       </span>
       <button
         type="submit"
-        className="rounded-md border border-marca-600 px-3 py-1.5 text-sm text-white hover:bg-marca-700"
+        className="rounded-pill border border-on-brand/40 px-3 py-1 text-sm font-semibold text-on-brand transition-colors hover:border-accent hover:text-accent"
       >
         Sair
       </button>
@@ -73,28 +104,53 @@ export function Navegacao({ nome, perfil, itensCarrinho }: { nome: string; perfi
   );
 
   return (
-    <header className="bg-marca-800 text-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-        <Link href="/" className="shrink-0 font-semibold">
-          Brindes <span className="font-normal text-marca-100">· Alper</span>
-        </Link>
-        <nav className="hidden flex-1 items-center gap-1 lg:flex" aria-label="Principal">
-          {menu}
-        </nav>
-        <div className="hidden lg:block">{usuario}</div>
+    <header className="sobre-marca relative overflow-hidden bg-surface-brand text-on-brand">
+      {/* Grafismo Alper à direita do cabeçalho */}
+      <div className="grafismo pointer-events-none absolute inset-y-0 right-0 w-1/3 opacity-70" aria-hidden />
 
-        {/* Menu recolhível em telas pequenas */}
-        <details className="relative lg:hidden">
-          <summary className="cursor-pointer list-none rounded-md border border-marca-600 px-3 py-1.5 text-sm">
-            Menu
-          </summary>
-          <div className="absolute right-0 z-20 mt-2 w-64 space-y-1 rounded-lg bg-marca-800 p-3 shadow-lg ring-1 ring-marca-700">
-            <nav aria-label="Principal (celular)" className="space-y-1">
-              {menu}
-            </nav>
-            <div className="border-t border-marca-700 pt-3">{usuario}</div>
-          </div>
-        </details>
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="flex items-center justify-between gap-4 py-4">
+          <Marca />
+          <div className="hidden lg:block">{usuario}</div>
+
+          {/* Menu recolhível em telas pequenas */}
+          <details className="relative lg:hidden">
+            <summary className="cursor-pointer list-none rounded-pill border border-on-brand/40 px-4 py-1.5 text-sm font-semibold">
+              Menu
+            </summary>
+            <div className="absolute right-0 z-20 mt-2 w-72 space-y-1 rounded-lg bg-surface-brand p-3 shadow-lg ring-1 ring-on-brand/15">
+              <nav aria-label="Principal (celular)" className="space-y-1">
+                {LINKS_TODOS.map((l) => (
+                  <ItemMovel key={l.href} {...l} caminho={caminho} contador={contadorDe(l.href)} />
+                ))}
+                {admin && (
+                  <>
+                    <p className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wide text-on-brand/70 uppercase">Administração</p>
+                    {LINKS_ADMIN.map((l) => (
+                      <ItemMovel key={l.href} {...l} caminho={caminho} />
+                    ))}
+                  </>
+                )}
+              </nav>
+              <div className="mt-2 border-t border-on-brand/15 pt-3">{usuario}</div>
+            </div>
+          </details>
+        </div>
+
+        <nav className="-mx-3 hidden items-center lg:flex" aria-label="Principal">
+          {LINKS_TODOS.map((l) => (
+            <Aba key={l.href} {...l} caminho={caminho} contador={contadorDe(l.href)} />
+          ))}
+          {admin && (
+            <>
+              <span className="mx-3 h-5 w-px bg-on-brand/30" aria-hidden />
+              <span className="pr-1 text-xs font-semibold tracking-wide text-on-brand/70 uppercase">Admin</span>
+              {LINKS_ADMIN.map((l) => (
+                <Aba key={l.href} {...l} caminho={caminho} />
+              ))}
+            </>
+          )}
+        </nav>
       </div>
     </header>
   );

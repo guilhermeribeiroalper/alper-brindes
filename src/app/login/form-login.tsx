@@ -7,7 +7,7 @@ import { Alerta, Campo, estilos } from "@/components/ui";
 export function FormLogin() {
   const [estado, acao, pendente] = useActionState(entrar, undefined);
   return (
-    <form action={acao} className={`${estilos.cartao} space-y-4 p-6`}>
+    <form action={acao} className="space-y-5">
       {estado?.erro && <Alerta tipo="erro">{estado.erro}</Alerta>}
       <Campo rotulo="E-mail" nome="email">
         <input id="email" name="email" type="email" autoComplete="email" required defaultValue={estado?.valores?.email} className={estilos.input} />
@@ -22,7 +22,7 @@ export function FormLogin() {
           className={estilos.input}
         />
       </Campo>
-      <button type="submit" disabled={pendente} className={`${estilos.botao} w-full`}>
+      <button type="submit" disabled={pendente} className={`${estilos.botao} w-full py-2.5`}>
         {pendente ? "Entrando…" : "Entrar"}
       </button>
     </form>

@@ -9,10 +9,20 @@ import { codigoSolicitacao, formatarData, formatarDataHora } from "@/lib/formata
 export const metadata = { title: "Painel · Catálogo de Brindes" };
 
 function Indicador({ rotulo, valor, href, destaque }: { rotulo: string; valor: number; href: string; destaque?: boolean }) {
+  // Pendência com valor: card na cor da marca, com grafismo.
+  const marca = destaque && valor > 0;
   return (
-    <Link href={href} className={`${estilos.cartao} block p-4 hover:border-marca-600`}>
-      <p className="text-sm text-slate-500">{rotulo}</p>
-      <p className={`mt-1 text-3xl font-semibold ${destaque && valor > 0 ? "text-marca-700" : "text-slate-900"}`}>{valor}</p>
+    <Link
+      href={href}
+      className={
+        marca
+          ? "sobre-marca relative block overflow-hidden rounded-md bg-surface-brand p-5 text-on-brand shadow-md"
+          : `${estilos.cartao} block p-5 transition hover:border-brand-navy hover:shadow-md`
+      }
+    >
+      {marca && <div className="grafismo pointer-events-none absolute inset-y-0 right-0 w-1/2 opacity-60" aria-hidden />}
+      <p className={`relative text-sm font-semibold ${marca ? "text-on-brand/85" : "text-on-surface-muted"}`}>{rotulo}</p>
+      <p className="relative mt-2 font-display text-4xl leading-none font-bold">{valor}</p>
     </Link>
   );
 }
@@ -50,13 +60,13 @@ export default async function PainelAdmin() {
         <Indicador rotulo="Produtos sem preço vigente" valor={produtosSemPreco} href="/admin/produtos" />
       </div>
 
-      <h2 className="mb-3 text-lg font-semibold">Solicitações pendentes</h2>
+      <h2 className="mb-3 font-display text-xl font-semibold text-on-surface">Solicitações pendentes</h2>
       {pendentes.length === 0 ? (
         <EstadoVazio titulo="Nenhuma solicitação pendente.">Tudo em dia.</EstadoVazio>
       ) : (
         <div className={`${estilos.cartao} overflow-x-auto`}>
           <table className={estilos.tabela}>
-            <thead className="bg-slate-50">
+            <thead className="bg-surface-alt">
               <tr>
                 <th className={estilos.th}>Solicitação</th>
                 <th className={estilos.th}>Solicitante</th>
@@ -66,21 +76,21 @@ export default async function PainelAdmin() {
                 <th className={estilos.th}>Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {pendentes.map((s) => {
                 const urgente = s.dataNecessaria && s.dataNecessaria <= emSeteDias;
                 return (
                   <tr key={s.id}>
                     <td className={estilos.td}>
-                      <Link href={`/admin/solicitacoes/${s.id}`} className={`${estilos.link} font-mono`}>
+                      <Link href={`/admin/solicitacoes/${s.id}`} className={`${estilos.link} tabular-nums`}>
                         {codigoSolicitacao(s.id)}
                       </Link>
                     </td>
                     <td className={estilos.td}>
                       {s.solicitante.nome}
-                      <p className="text-xs text-slate-500">{s.departamento}</p>
+                      <p className="text-xs text-on-surface-muted">{s.departamento}</p>
                     </td>
-                    <td className={`${estilos.td} ${urgente ? "font-semibold text-red-700" : ""}`}>
+                    <td className={`${estilos.td} ${urgente ? "font-semibold text-error" : ""}`}>
                       {s.dataNecessaria ? formatarData(s.dataNecessaria) : "—"}
                       {urgente && <span className="block text-xs font-normal">em até 7 dias</span>}
                     </td>

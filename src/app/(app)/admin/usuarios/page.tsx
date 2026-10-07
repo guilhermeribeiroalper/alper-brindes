@@ -31,7 +31,7 @@ export default async function PaginaUsuarios() {
       ) : (
         <div className={`${estilos.cartao} overflow-x-auto`}>
           <table className={estilos.tabela}>
-            <thead className="bg-slate-50">
+            <thead className="bg-surface-alt">
               <tr>
                 <th className={estilos.th}>Nome</th>
                 <th className={estilos.th}>Departamento</th>
@@ -40,17 +40,17 @@ export default async function PaginaUsuarios() {
                 <th className={estilos.th}>Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {usuarios.map((u) => {
                 const proprio = u.id === admin.id;
                 return (
-                  <tr key={u.id} className={u.ativo ? "" : "bg-slate-50 text-slate-500"}>
+                  <tr key={u.id} className={u.ativo ? "" : "bg-surface-alt text-on-surface-muted"}>
                     <td className={estilos.td}>
                       <p className="font-medium">
-                        {u.nome} {proprio && <span className="text-xs text-slate-500">(você)</span>}
+                        {u.nome} {proprio && <span className="text-xs text-on-surface-muted">(você)</span>}
                       </p>
-                      <p className="text-xs text-slate-500">{u.email}</p>
-                      <p className="text-xs text-slate-400">Criado em {formatarDataHora(u.criadoEm)}</p>
+                      <p className="text-xs text-on-surface-muted">{u.email}</p>
+                      <p className="text-xs text-on-surface-muted">Criado em {formatarDataHora(u.criadoEm)}</p>
                     </td>
                     <td className={estilos.td}>{u.departamento}</td>
                     <td className={estilos.td}>

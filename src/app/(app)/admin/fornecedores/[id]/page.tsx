@@ -50,13 +50,13 @@ export default async function EditarFornecedor(props: PageProps<"/admin/forneced
 
       <FormFornecedor fornecedor={fornecedor} />
 
-      <h2 className="mb-3 mt-8 text-lg font-semibold">Preços deste fornecedor</h2>
+      <h2 className="mb-3 mt-8 font-display text-xl font-semibold text-on-surface">Preços deste fornecedor</h2>
       {fornecedor.precos.length === 0 ? (
-        <p className="text-sm text-slate-500">Nenhum preço cadastrado.</p>
+        <p className="text-sm text-on-surface-muted">Nenhum preço cadastrado.</p>
       ) : (
         <div className={`${estilos.cartao} overflow-x-auto`}>
           <table className={estilos.tabela}>
-            <thead className="bg-slate-50">
+            <thead className="bg-surface-alt">
               <tr>
                 <th className={estilos.th}>Produto</th>
                 <th className={estilos.th}>Qtd. mínima</th>
@@ -64,7 +64,7 @@ export default async function EditarFornecedor(props: PageProps<"/admin/forneced
                 <th className={estilos.th}>Validade</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {fornecedor.precos.map((p) => (
                 <tr key={p.id}>
                   <td className={estilos.td}>

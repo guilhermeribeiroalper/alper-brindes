@@ -42,8 +42,8 @@ export default async function FilaSolicitacoes(props: PageProps<"/admin/solicita
             key={f.valor}
             href={`/admin/solicitacoes?status=${f.valor}`}
             aria-current={f.valor === filtro.valor ? "page" : undefined}
-            className={`rounded-full border px-3 py-1 text-sm ${
-              f.valor === filtro.valor ? "border-marca-600 bg-marca-600 text-white" : "border-slate-300 bg-white hover:bg-slate-50"
+            className={`rounded-pill border px-3.5 py-1 text-sm font-semibold transition-colors ${
+              f.valor === filtro.valor ? "border-brand-navy bg-brand-navy text-on-brand" : "border-brand-gray bg-surface text-on-surface hover:border-brand-navy"
             }`}
           >
             {f.rotulo}
@@ -56,7 +56,7 @@ export default async function FilaSolicitacoes(props: PageProps<"/admin/solicita
       ) : (
         <div className={`${estilos.cartao} overflow-x-auto`}>
           <table className={estilos.tabela}>
-            <thead className="bg-slate-50">
+            <thead className="bg-surface-alt">
               <tr>
                 <th className={estilos.th}>Solicitação</th>
                 <th className={estilos.th}>Solicitante</th>
@@ -67,17 +67,17 @@ export default async function FilaSolicitacoes(props: PageProps<"/admin/solicita
                 <th className={estilos.th}>Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {solicitacoes.map((s) => (
                 <tr key={s.id}>
                   <td className={estilos.td}>
-                    <Link href={`/admin/solicitacoes/${s.id}`} className={`${estilos.link} font-mono`}>
+                    <Link href={`/admin/solicitacoes/${s.id}`} className={`${estilos.link} tabular-nums`}>
                       {codigoSolicitacao(s.id)}
                     </Link>
                   </td>
                   <td className={estilos.td}>
                     {s.solicitante.nome}
-                    <p className="text-xs text-slate-500">{s.departamento}</p>
+                    <p className="text-xs text-on-surface-muted">{s.departamento}</p>
                   </td>
                   <td className={estilos.td}>{s.enviadaEm ? formatarDataHora(s.enviadaEm) : "—"}</td>
                   <td className={estilos.td}>{s.dataNecessaria ? formatarData(s.dataNecessaria) : "—"}</td>

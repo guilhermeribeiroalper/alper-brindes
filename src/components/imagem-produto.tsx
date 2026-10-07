@@ -8,7 +8,7 @@ export function ImagemProduto({ url, nome, className = "" }: { url: string | nul
       .join("");
     return (
       <div
-        className={`flex items-center justify-center bg-gradient-to-br from-marca-50 to-marca-100 text-2xl font-semibold text-marca-600 ${className}`}
+        className={`grafismo-claro flex items-center justify-center bg-surface-alt font-display text-3xl font-bold text-brand-navy ${className}`}
         aria-hidden
       >
         {iniciais}
@@ -17,5 +17,5 @@ export function ImagemProduto({ url, nome, className = "" }: { url: string | nul
   }
   // <img> em vez de next/image: as URLs são de domínios arbitrários cadastrados pelo admin.
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={url} alt={nome} loading="lazy" className={`object-cover ${className}`} />;
+  return <img src={url} alt={nome} loading="lazy" className={`bg-surface-alt object-cover ${className}`} />;
 }

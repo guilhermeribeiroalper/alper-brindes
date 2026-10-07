@@ -77,13 +77,13 @@ export default async function MinhaSolicitacao() {
         {linhas.map(({ item, estimativa }) => (
           <li key={item.id} className={`${estilos.cartao} flex flex-col gap-3 p-4 sm:flex-row sm:items-center`}>
             <div className="flex-1">
-              <p className="text-xs uppercase tracking-wide text-slate-500">{item.produto.categoria}</p>
+              <p className="text-xs uppercase tracking-wide text-on-surface-muted">{item.produto.categoria}</p>
               {item.produto.ativo ? (
-                <Link href={`/catalogo/${item.produto.id}`} className="font-medium text-slate-900 hover:underline">
+                <Link href={`/catalogo/${item.produto.id}`} className="font-medium text-on-surface hover:underline">
                   {item.produto.nome}
                 </Link>
               ) : (
-                <p className="font-medium text-slate-500">
+                <p className="font-medium text-on-surface-muted">
                   {item.produto.nome} <span className="text-xs">(indisponível)</span>
                 </p>
               )}
@@ -93,10 +93,10 @@ export default async function MinhaSolicitacao() {
                     <span className="font-semibold">
                       <FaixaTotal minimo={estimativa.totalMinimoCentavos} maximo={estimativa.totalMaximoCentavos} />
                     </span>
-                    <span className="text-slate-500"> · prazo {formatarPrazo(estimativa.prazoMinDias, estimativa.prazoMaxDias)}</span>
+                    <span className="text-on-surface-muted"> · prazo {formatarPrazo(estimativa.prazoMinDias, estimativa.prazoMaxDias)}</span>
                   </>
                 ) : (
-                  <span className="text-amber-700">
+                  <span className="font-semibold text-on-surface">
                     {estimativa.motivo === "PRODUTO_INATIVO" ? "Produto indisponível" : "Sem preço de referência: requer cotação formal"}
                     {estimativa.motivo === "SEM_PRECO_APLICAVEL" && estimativa.quantidadeMinimaDisponivel
                       ? ` (há referência a partir de ${estimativa.quantidadeMinimaDisponivel} un.)`
@@ -109,7 +109,7 @@ export default async function MinhaSolicitacao() {
               <form action={alterarQuantidadeItem} className="flex items-end gap-2">
                 <input type="hidden" name="itemId" value={item.id} />
                 <div>
-                  <label htmlFor={`qtd-${item.id}`} className="block text-xs text-slate-500">
+                  <label htmlFor={`qtd-${item.id}`} className="block text-xs text-on-surface-muted">
                     Quantidade
                   </label>
                   <input
@@ -139,12 +139,12 @@ export default async function MinhaSolicitacao() {
       </ul>
 
       <div className={`${estilos.cartao} mt-4 p-4`}>
-        <p className="text-sm text-slate-500">Total estimado da lista</p>
+        <p className="text-sm text-on-surface-muted">Total estimado da lista</p>
         <p className="text-2xl font-semibold">
           {total.itensComPreco > 0 ? <FaixaTotal minimo={total.totalMinimoCentavos} maximo={total.totalMaximoCentavos} /> : "—"}
         </p>
         {total.itensSemPreco > 0 && (
-          <p className="mt-1 text-sm text-amber-700">
+          <p className="mt-1 text-sm font-semibold text-on-surface">
             {total.itensSemPreco === 1 ? "1 item" : `${total.itensSemPreco} itens`} sem preço de referência{" "}
             {total.itensSemPreco === 1 ? "não entra" : "não entram"} no total; o administrador fará a cotação.
           </p>
@@ -155,8 +155,8 @@ export default async function MinhaSolicitacao() {
       </div>
 
       <section className={`${estilos.cartao} mt-6 p-6`}>
-        <h2 className="text-lg font-semibold">Enviar solicitação formal de cotação</h2>
-        <p className="mb-4 mt-1 text-sm text-slate-500">
+        <h2 className="font-display text-xl font-semibold text-on-surface">Enviar solicitação formal de cotação</h2>
+        <p className="mb-4 mt-1 text-sm text-on-surface-muted">
           Ao enviar, as estimativas acima ficam registradas e o administrador recebe o pedido.
         </p>
         <FormEnvio

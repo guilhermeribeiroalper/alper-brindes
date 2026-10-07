@@ -64,12 +64,12 @@ export default async function PaginaCatalogo(props: PageProps<"/catalogo">) {
               <li key={p.id}>
                 <Link
                   href={`/catalogo/${p.id}`}
-                  className={`${estilos.cartao} group flex h-full flex-col overflow-hidden transition hover:border-marca-600 hover:shadow-md`}
+                  className={`${estilos.cartao} group flex h-full flex-col overflow-hidden transition hover:border-brand-navy hover:shadow-md`}
                 >
                   <ImagemProduto url={p.imagemUrl} nome={p.nome} className="aspect-[4/3] w-full" />
                   <div className="flex flex-1 flex-col gap-2 p-4">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{p.categoria}</p>
-                    <h2 className="font-semibold text-slate-900 group-hover:text-marca-700">{p.nome}</h2>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-interactive-hover">{p.categoria}</p>
+                    <h2 className="text-base leading-snug font-semibold text-on-surface group-hover:underline">{p.nome}</h2>
                     <div className="mt-auto pt-2">
                       <FaixaPrecoReferencia faixa={p.faixa} />
                     </div>

@@ -78,7 +78,7 @@ export default async function PrecosProduto(props: PageProps<"/admin/produtos/[i
       ) : (
         <div className={`${estilos.cartao} mb-6 overflow-x-auto`}>
           <table className={estilos.tabela}>
-            <thead className="bg-slate-50">
+            <thead className="bg-surface-alt">
               <tr>
                 <th className={estilos.th}>Fornecedor</th>
                 <th className={estilos.th}>A partir de</th>
@@ -89,14 +89,14 @@ export default async function PrecosProduto(props: PageProps<"/admin/produtos/[i
                 <th className={estilos.th}>Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {produto.precos.map((p) => {
                 const situacao = situacaoPreco({ ...p, fornecedorAtivo: p.fornecedor.ativo }, hoje);
                 return (
-                  <tr key={p.id} className={situacao === "VIGENTE" ? "" : "text-slate-500"}>
+                  <tr key={p.id} className={situacao === "VIGENTE" ? "" : "text-on-surface-muted"}>
                     <td className={estilos.td}>
                       {p.fornecedor.nome}
-                      {p.observacoes && <p className="text-xs text-slate-500">{p.observacoes}</p>}
+                      {p.observacoes && <p className="text-xs text-on-surface-muted">{p.observacoes}</p>}
                     </td>
                     <td className={estilos.td}>{p.quantidadeMinima} un.</td>
                     <td className={`${estilos.td} font-medium`}>{formatarBRL(p.valorUnitarioCentavos)}</td>
@@ -128,8 +128,8 @@ export default async function PrecosProduto(props: PageProps<"/admin/produtos/[i
       )}
 
       <section className={`${estilos.cartao} mb-8 p-6`}>
-        <h2 className="mb-1 text-lg font-semibold">Adicionar faixa de preço</h2>
-        <p className="mb-4 text-sm text-slate-500">
+        <h2 className="mb-1 font-display text-xl font-semibold text-on-surface">Adicionar faixa de preço</h2>
+        <p className="mb-4 text-sm text-on-surface-muted">
           Cadastre uma linha por faixa de quantidade. Ex.: R$ 18,90 a partir de 1 un. e R$ 14,90 a partir de 100 un.
         </p>
         <FormPreco
@@ -139,7 +139,7 @@ export default async function PrecosProduto(props: PageProps<"/admin/produtos/[i
         />
       </section>
 
-      <h2 className="mb-3 text-lg font-semibold">Histórico de alterações de preço</h2>
+      <h2 className="mb-3 font-display text-xl font-semibold text-on-surface">Histórico de alterações de preço</h2>
       <HistoricoPreco linhas={historico} />
     </>
   );
