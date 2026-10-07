@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { obterUsuarioAtual } from "@/lib/auth/sessao";
 import { FormLogin } from "./form-login";
@@ -8,22 +9,55 @@ export default async function PaginaLogin() {
   if (await obterUsuarioAtual()) redirect("/");
   return (
     <main className="grid flex-1 bg-surface lg:grid-cols-2">
-      {/* Painel da marca: surface-brand com grafismo em accent */}
-      <section className="sobre-marca relative overflow-hidden bg-surface-brand px-6 py-10 text-on-brand sm:px-12 lg:flex lg:flex-col lg:justify-between lg:p-16">
-        <div className="grafismo pointer-events-none absolute inset-0 opacity-80" aria-hidden />
-        <div className="pointer-events-none absolute right-0 bottom-0 h-24 w-2/3 bg-accent/90 lg:h-32" aria-hidden />
+      {/* Foto com degradê na cor da marca para garantir a leitura do texto branco */}
+      <section className="sobre-marca relative flex min-h-80 flex-col justify-between overflow-hidden bg-surface-brand px-6 py-10 text-on-brand sm:px-12 lg:p-16">
+        <Image
+          src="/imagens/login-presentes.jpg"
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          className="object-cover"
+        />
+        <div
+          className="pointer-events-none absolute inset-0 bg-linear-to-t from-surface-brand via-surface-brand/70 to-surface-brand/20"
+          aria-hidden
+        />
 
         <div className="relative">
           <p className="font-display text-4xl leading-none font-bold tracking-tight lowercase">alper</p>
-          <p className="mt-2 text-xs tracking-[0.08em] text-on-brand/80 lowercase">alta performance em seguros</p>
+          <p className="mt-2 text-xs tracking-[0.08em] text-on-brand/85 lowercase">alta performance em seguros</p>
         </div>
 
-        <div className="relative mt-10 max-w-md lg:mt-0 lg:mb-32">
+        <div className="relative mt-16 max-w-md">
           <h1 className="font-display text-4xl leading-[1.1] font-bold lg:text-5xl">Catálogo de Brindes</h1>
-          <p className="mt-4 text-base leading-7 text-on-brand/85 lg:text-lg">
+          <span className="mt-3 block h-1 w-12 rounded-pill bg-accent" aria-hidden />
+          <p className="mt-4 text-base leading-7 text-on-brand/90 lg:text-lg">
             Consulte os brindes, veja uma estimativa na hora e envie sua solicitação de cotação.
           </p>
         </div>
+
+        {/* Crédito exigido pela licença CC BY 2.0 */}
+        <p className="absolute right-3 bottom-2 text-[11px] text-on-brand/70">
+          Foto:{" "}
+          <a
+            href="https://commons.wikimedia.org/wiki/File:Brown_gift_box_with_red_ribbon_and_bow.jpg"
+            className="underline hover:text-on-brand"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Shixart1985
+          </a>
+          ,{" "}
+          <a
+            href="https://creativecommons.org/licenses/by/2.0/deed.pt-br"
+            className="underline hover:text-on-brand"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            CC BY 2.0
+          </a>
+        </p>
       </section>
 
       <section className="flex items-center justify-center px-4 py-12 sm:px-8">

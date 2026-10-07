@@ -101,7 +101,8 @@ As suposições feitas onde o escopo não definia o comportamento estão em [doc
 A interface segue o **Alper Design System** (tokens, tipografia e grafismo). Os tokens estão em `src/app/globals.css`, com os mesmos nomes do `tokens.json` do design system. Exemplos: `brand-navy`, `surface`, `on-surface`, `accent`, `radius-md`, `shadow-sm`. Os componentes base ficam em `src/components/ui.tsx`.
 
 - **Tipografia:** Montserrat, carregada pelo `next/font`. Pluto, a fonte de títulos, é proprietária e não vem incluída. Se for instalada, entra antes da Montserrat na pilha `font-display`.
-- **Grafismo:** utilitário `grafismo`, com linhas diagonais de 1px em lime sobre áreas navy (cabeçalho, login, resultado da estimativa, indicadores do painel).
+- **Grafismo:** utilitário `grafismo`, com linhas diagonais de 1px em lime sobre áreas navy (cabeçalho, resultado da estimativa, indicadores do painel).
+- **Foto do login:** `public/imagens/login-presentes.jpg`, "Brown gift box with red ribbon and bow", de Shixart1985, via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Brown_gift_box_with_red_ribbon_and_bow.jpg). A licença é [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) e exige o crédito, que aparece na própria tela. A foto não recebe o overlay de grafismo que o design system pede para fotografias: foi uma escolha de layout. Para trocar, substitua o arquivo e atualize o crédito em `src/app/login/page.tsx`.
 - **Logotipo:** o design system não traz o arquivo oficial. Por isso, a marca aparece só como texto ("alper"). Para usar o logo oficial, troque o componente `Marca` em `src/components/navegacao.tsx`, respeitando a área de proteção e o tamanho mínimo de 200px.
 - **Contraste (AA):** alguns pares de tokens não chegam a 4,5:1 em texto pequeno. Por isso:
   - os botões principais usam `brand-navy` (branco sobre `interactive` dá só 4,0:1);
