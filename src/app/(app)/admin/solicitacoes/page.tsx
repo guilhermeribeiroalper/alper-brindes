@@ -12,9 +12,9 @@ const FILTROS: { valor: string; rotulo: string; status: StatusSolicitacao[] }[] 
   { valor: "pendentes", rotulo: "Pendentes", status: ["ENVIADA", "EM_ANALISE"] },
   { valor: "ENVIADA", rotulo: ROTULO_STATUS.ENVIADA, status: ["ENVIADA"] },
   { valor: "EM_ANALISE", rotulo: ROTULO_STATUS.EM_ANALISE, status: ["EM_ANALISE"] },
-  { valor: "RESPONDIDA", rotulo: ROTULO_STATUS.RESPONDIDA, status: ["RESPONDIDA"] },
+  { valor: "APROVADA", rotulo: ROTULO_STATUS.APROVADA, status: ["APROVADA"] },
   { valor: "CANCELADA", rotulo: ROTULO_STATUS.CANCELADA, status: ["CANCELADA"] },
-  { valor: "todas", rotulo: "Todas", status: ["ENVIADA", "EM_ANALISE", "RESPONDIDA", "CANCELADA"] },
+  { valor: "todas", rotulo: "Todas", status: ["ENVIADA", "EM_ANALISE", "APROVADA", "CANCELADA"] },
 ];
 
 export default async function FilaSolicitacoes(props: PageProps<"/admin/solicitacoes">) {

@@ -21,7 +21,7 @@ enum StatusSolicitacao {
   RASCUNHO
   ENVIADA
   EM_ANALISE
-  RESPONDIDA
+  APROVADA
   CANCELADA
 }
 
@@ -36,10 +36,11 @@ model Usuario {
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
-  sessoes          Sessao[]
-  solicitacoes     SolicitacaoCotacao[]
-  respostas        RespostaCotacao[]
-  alteracoesPreco  HistoricoPreco[]
+  sessoes         Sessao[]
+  solicitacoes    SolicitacaoCotacao[] @relation("Solicitante")
+  cancelamentos   SolicitacaoCotacao[] @relation("CanceladaPor")
+  respostas       RespostaCotacao[]
+  alteracoesPreco HistoricoPreco[]
 }
 
 model Sessao {
@@ -65,8 +66,8 @@ model Fornecedor {
   criadoEm        DateTime @default(now())
   atualizadoEm    DateTime @updatedAt
 
-  precos              PrecoFornecedor[]
-  respostasEscolhido  RespostaCotacao[]
+  precos             PrecoFornecedor[]
+  respostasEscolhido RespostaCotacao[]
 }
 
 model Produto {
@@ -86,19 +87,19 @@ model Produto {
 }
 
 model PrecoFornecedor {
-  id                      String   @id @default(cuid())
-  produtoId               String
-  fornecedorId            String
-  valorUnitarioCentavos   Int
-  quantidadeMinima        Int      @default(1)
-  prazoEntregaDias        Int
+  id                    String   @id @default(cuid())
+  produtoId             String
+  fornecedorId          String
+  valorUnitarioCentavos Int
+  quantidadeMinima      Int      @default(1)
+  prazoEntregaDias      Int
   // Último dia (inclusive) em que a estimativa vale. Guardado à meia-noite UTC
   // da data civil escolhida; comparado com a data de hoje em America/Sao_Paulo.
-  validadeEstimativa      DateTime
-  observacoes             String?
-  ativo                   Boolean  @default(true)
-  criadoEm                DateTime @default(now())
-  atualizadoEm            DateTime @updatedAt
+  validadeEstimativa    DateTime
+  observacoes           String?
+  ativo                 Boolean  @default(true)
+  criadoEm              DateTime @default(now())
+  atualizadoEm          DateTime @updatedAt
 
   produto    Produto          @relation(fields: [produtoId], references: [id])
   fornecedor Fornecedor       @relation(fields: [fornecedorId], references: [id])
@@ -109,12 +110,12 @@ model PrecoFornecedor {
 }
 
 model HistoricoPreco {
-  id                      String   @id @default(cuid())
-  precoFornecedorId       String
-  valorAnteriorCentavos   Int?
-  valorNovoCentavos       Int
-  alteradoPorId           String
-  alteradoEm              DateTime @default(now())
+  id                    String   @id @default(cuid())
+  precoFornecedorId     String
+  valorAnteriorCentavos Int?
+  valorNovoCentavos     Int
+  alteradoPorId         String
+  alteradoEm            DateTime @default(now())
 
   precoFornecedor PrecoFornecedor @relation(fields: [precoFornecedorId], references: [id])
   alteradoPor     Usuario         @relation(fields: [alteradoPorId], references: [id])
@@ -123,20 +124,24 @@ model HistoricoPreco {
 }
 
 model SolicitacaoCotacao {
-  id             String            @id @default(cuid())
-  solicitanteId  String
-  departamento   String
-  dataNecessaria DateTime?
-  justificativa  String?
-  status         StatusSolicitacao @default(RASCUNHO)
-  enviadaEm      DateTime?
-  canceladaEm    DateTime?
-  criadaEm       DateTime          @default(now())
-  atualizadaEm   DateTime          @updatedAt
+  id                 String            @id @default(cuid())
+  solicitanteId      String
+  departamento       String
+  dataNecessaria     DateTime?
+  justificativa      String?
+  status             StatusSolicitacao @default(RASCUNHO)
+  enviadaEm          DateTime?
+  canceladaEm        DateTime?
+  // Preenchidos quando o ADMIN cancela (o solicitante cancela sem motivo).
+  canceladaPorId     String?
+  motivoCancelamento String?
+  criadaEm           DateTime          @default(now())
+  atualizadaEm       DateTime          @updatedAt
 
-  solicitante Usuario           @relation(fields: [solicitanteId], references: [id])
-  itens       ItemSolicitacao[]
-  resposta    RespostaCotacao?
+  solicitante  Usuario           @relation("Solicitante", fields: [solicitanteId], references: [id])
+  canceladaPor Usuario?          @relation("CanceladaPor", fields: [canceladaPorId], references: [id])
+  itens        ItemSolicitacao[]
+  resposta     RespostaCotacao?
 
   @@index([solicitanteId, status])
   @@index([status])
@@ -160,14 +165,21 @@ model ItemSolicitacao {
 }
 
 model RespostaCotacao {
-  id                     String   @id @default(cuid())
-  solicitacaoId          String   @unique
-  adminId                String
+  id                      String   @id @default(cuid())
+  solicitacaoId           String   @unique
+  adminId                 String
   valorTotalFinalCentavos Int
-  fornecedorEscolhidoId  String?
-  prazoEntregaDias       Int
-  observacoes            String?
-  respondidaEm           DateTime @default(now())
+  fornecedorEscolhidoId   String?
+  prazoEntregaDias        Int
+  observacoes             String?
+  respondidaEm            DateTime @default(now())
+
+  // Integração com o ClickUp: tarefa criada na aprovação (reenviável em caso de falha).
+  clickupTaskId        String?
+  clickupTaskUrl       String?
+  clickupErro          String?
+  // Trava contra envio duplicado: marcada enquanto uma criação de tarefa está em andamento.
+  clickupEnviandoDesde DateTime?
 
   solicitacao         SolicitacaoCotacao @relation(fields: [solicitacaoId], references: [id])
   admin               Usuario            @relation(fields: [adminId], references: [id])

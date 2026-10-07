@@ -14,12 +14,12 @@ Status: **PROPOSTA** = aguardando confirmação · **CONFIRMADA** · **ALTERADA*
 | S7 | Valores monetários | Valores guardados em **centavos (inteiro)** para ser exato e funcionar igual em SQLite e PostgreSQL. | CONFIRMADA |
 | S8 | Exclusões | Produtos, fornecedores, preços e usuários não são excluídos fisicamente; são inativados (preserva histórico e solicitações antigas). | CONFIRMADA |
 | S9 | Histórico de preço | `HistoricoPreco` registra a criação (valor anterior vazio) e toda alteração de `valorUnitario`. Alterações em outros campos não geram histórico. | CONFIRMADA |
-| S10 | Cancelamento | Só o solicitante cancela (em RASCUNHO ou ENVIADA). O admin não cancela neste MVP. | CONFIRMADA |
+| S10 | Cancelamento | O solicitante cancela em RASCUNHO ou ENVIADA. O admin também cancela, com motivo obrigatório (visível ao solicitante), em ENVIADA ou EM_ANALISE. | ALTERADA |
 | S11 | Imagem do produto | `imagemUrl` é uma URL digitada pelo admin; não há upload de arquivos no MVP. | CONFIRMADA |
 | S12 | Categoria | Categoria é texto livre no produto, com sugestões das categorias já usadas (sem tabela própria). | CONFIRMADA |
 | S13 | Departamento | O departamento da solicitação vem preenchido com o do usuário e pode ser editado no envio. | CONFIRMADA |
 | S14 | ADMIN usa o catálogo | O ADMIN também pode usar catálogo, carrinho e solicitações, como um solicitante. | CONFIRMADA |
-| S15 | Resposta | A resposta do admin traz só o valor total final (sem valor por item) e é única por solicitação. | CONFIRMADA |
+| S15 | Resposta | A decisão do admin é a aprovação: traz o valor total final (sem valor por item), fornecedor, prazo e observações, e é única por solicitação. O status RESPONDIDA foi substituído por APROVADA. | ALTERADA |
 | S16 | Autenticação | Sessão própria guardada no banco (cookie httpOnly com token aleatório; só o hash do token vai para o banco) e senha com bcrypt. Não usa Auth.js. | CONFIRMADA |
 | S17 | Troca para PostgreSQL | O Prisma não aceita `provider` vindo de variável de ambiente. Para ir à produção, troca-se `provider = "sqlite"` por `"postgresql"` e geram-se as migrações de novo. O esquema evita recursos exclusivos de um dos bancos. | CONFIRMADA |
 | S18 | Duração da sessão | A sessão expira em 12 horas; depois disso é preciso entrar de novo. Desativar um usuário ou redefinir a senha dele encerra todas as sessões dele. | PROPOSTA |
@@ -27,8 +27,12 @@ Status: **PROPOSTA** = aguardando confirmação · **CONFIRMADA** · **ALTERADA*
 | S20 | Proteção do próprio admin | O admin não pode desativar a si mesmo nem retirar o próprio perfil ADMIN, para não ficar sem nenhum administrador. | PROPOSTA |
 | S21 | Busca | A busca ignora maiúsculas e acentos e é feita na aplicação (não no banco), para o comportamento ser igual em SQLite e PostgreSQL. Adequado ao volume esperado de um catálogo interno (centenas de itens). | PROPOSTA |
 | S22 | Validade padrão | Ao cadastrar um preço, a validade sugerida é hoje + 90 dias (editável). | PROPOSTA |
-| S23 | Fluxo do admin | O admin precisa "Iniciar análise" (ENVIADA → EM_ANALISE) antes de registrar a resposta; não há atalho de ENVIADA direto para RESPONDIDA. | PROPOSTA |
+| S23 | Fluxo do admin | O admin precisa "Iniciar análise" (ENVIADA → EM_ANALISE) antes de aprovar; não há atalho de ENVIADA direto para APROVADA. | ALTERADA |
 | S24 | Observações da resposta | As observações da resposta são visíveis ao solicitante; o fornecedor escolhido não é. | PROPOSTA |
 | S25 | Itens fora do catálogo | Se um produto do carrinho for desativado antes do envio, o envio fica bloqueado até o item ser removido. Em solicitações já enviadas o item permanece, marcado como "fora do catálogo". | PROPOSTA |
 | S26 | Dados do envio | A data necessária não pode ser anterior a hoje; a justificativa tem entre 10 e 2.000 caracteres. | PROPOSTA |
 | S27 | Painel | O painel destaca solicitações pendentes com data necessária em até 7 dias e mostra contagens de preços vencidos e de produtos sem preço vigente. | PROPOSTA |
+| S28 | Integração ClickUp | Na aprovação é criada uma tarefa na lista `CLICKUP_LIST_ID`, com token pessoal `CLICKUP_API_TOKEN` (no .env). Título: "Brindes aprovados #CÓDIGO · Departamento"; tag `brindes`; prazo = data necessária (12:00 de Brasília). | CONFIRMADA |
+| S29 | Falha no ClickUp | A aprovação nunca é desfeita por falha na integração: o erro fica registrado e o admin pode reenviar. Uma trava evita tarefa duplicada; se o servidor cair no meio de um envio, a trava expira em 2 minutos. | CONFIRMADA |
+| S30 | Conteúdo da tarefa | Leva brindes (quantidade e estimativa congelada), valor final, fornecedor, prazo, quem aprovou, solicitante (nome, e-mail, departamento), data necessária e justificativa. Não leva link para o app (exigiria configurar a URL pública). | CONFIRMADA |
+| S31 | Solicitações antigas | Solicitações que estavam RESPONDIDA viram APROVADA na migração, sem tarefa no ClickUp. O admin pode criá-la pelo botão "Criar tarefa no ClickUp". | PROPOSTA |

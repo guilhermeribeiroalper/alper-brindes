@@ -9,7 +9,8 @@ import { estimarItens } from "@/lib/consultas/catalogo";
 import { obterRascunho } from "@/lib/consultas/solicitacoes";
 import { validarTransicao, type StatusSolicitacao } from "@/lib/regras/status";
 import { errosDeValidacao, valoresDoForm, type EstadoForm } from "@/lib/validacao/comum";
-import { esquemaEnvio, esquemaResposta } from "@/lib/validacao/solicitacao";
+import { esquemaAprovacao, esquemaCancelamentoAdmin, esquemaEnvio } from "@/lib/validacao/solicitacao";
+import { sincronizarClickUp } from "@/lib/integracoes/sincronizar-clickup";
 
 /** Erro de concorrência: o status mudou entre a leitura e a gravação. */
 class StatusAlterado extends Error {}
@@ -86,18 +87,22 @@ export async function enviarSolicitacao(_estado: EstadoForm, formData: FormData)
   redirect(`/solicitacoes/${rascunho.id}?enviada=1`);
 }
 
-/** Muda o status, conferindo a regra de transição e que o status não mudou nesse meio-tempo. */
+/**
+ * Muda o status conferindo a regra de transição e que o status não mudou nesse meio-tempo.
+ * `atuandoComo` define qual regra vale: "DONO" (ações do solicitante) ou "ADMIN".
+ */
 async function transicionar(
   id: string,
   para: StatusSolicitacao,
   ator: { id: string; perfil: "ADMIN" | "SOLICITANTE" },
-  dadosExtras: { canceladaEm?: Date } = {},
+  atuandoComo: "DONO" | "ADMIN",
+  dadosExtras: { canceladaEm?: Date; canceladaPorId?: string; motivoCancelamento?: string } = {},
 ) {
   const solicitacao = await db.solicitacaoCotacao.findUnique({ where: { id } });
   if (!solicitacao) throw new Error("Solicitação não encontrada.");
   const resultado = validarTransicao(solicitacao.status, para, {
-    perfil: ator.perfil,
-    ehDono: solicitacao.solicitanteId === ator.id,
+    perfil: atuandoComo === "ADMIN" ? ator.perfil : "SOLICITANTE",
+    ehDono: atuandoComo === "DONO" && solicitacao.solicitanteId === ator.id,
   });
   if (!resultado.ok) throw new Error(resultado.erro);
 
@@ -113,7 +118,7 @@ async function transicionar(
 export async function cancelarSolicitacao(formData: FormData): Promise<void> {
   const usuario = await exigirUsuario();
   const id = String(formData.get("id") ?? "");
-  const anterior = await transicionar(id, "CANCELADA", usuario, { canceladaEm: new Date() });
+  const anterior = await transicionar(id, "CANCELADA", usuario, "DONO", { canceladaEm: new Date() });
   revalidarSolicitacao(id);
   revalidatePath("/minha-solicitacao");
   if (anterior.status === "RASCUNHO") redirect("/minha-solicitacao");
@@ -123,20 +128,43 @@ export async function cancelarSolicitacao(formData: FormData): Promise<void> {
 export async function iniciarAnalise(formData: FormData): Promise<void> {
   const admin = await exigirAdmin();
   const id = String(formData.get("id") ?? "");
-  await transicionar(id, "EM_ANALISE", admin);
+  await transicionar(id, "EM_ANALISE", admin, "ADMIN");
   revalidarSolicitacao(id);
 }
 
-/** Admin registra a resposta (EM_ANALISE → RESPONDIDA). */
-export async function responderSolicitacao(_estado: EstadoForm, formData: FormData): Promise<EstadoForm> {
+/** Admin cancela a solicitação com um motivo (em ENVIADA ou EM_ANALISE). */
+export async function cancelarSolicitacaoAdmin(_estado: EstadoForm, formData: FormData): Promise<EstadoForm> {
   const admin = await exigirAdmin();
   const id = String(formData.get("id") ?? "");
-  const dados = esquemaResposta.safeParse(Object.fromEntries(formData));
+  const dados = esquemaCancelamentoAdmin.safeParse(Object.fromEntries(formData));
+  if (!dados.success) return errosDeValidacao(dados.error, formData);
+
+  try {
+    await transicionar(id, "CANCELADA", admin, "ADMIN", {
+      canceladaEm: new Date(),
+      canceladaPorId: admin.id,
+      motivoCancelamento: dados.data.motivo,
+    });
+  } catch (erro) {
+    return { erro: (erro as Error).message, valores: valoresDoForm(formData) };
+  }
+  revalidarSolicitacao(id);
+  redirect(`/admin/solicitacoes/${id}`);
+}
+
+/**
+ * Admin aprova a solicitação (EM_ANALISE → APROVADA), registrando valor final, fornecedor e prazo.
+ * Depois de gravar, cria a tarefa no ClickUp; uma falha na integração não desfaz a aprovação.
+ */
+export async function aprovarSolicitacao(_estado: EstadoForm, formData: FormData): Promise<EstadoForm> {
+  const admin = await exigirAdmin();
+  const id = String(formData.get("id") ?? "");
+  const dados = esquemaAprovacao.safeParse(Object.fromEntries(formData));
   if (!dados.success) return errosDeValidacao(dados.error, formData);
 
   const solicitacao = await db.solicitacaoCotacao.findUnique({ where: { id } });
   if (!solicitacao) return { erro: "Solicitação não encontrada." };
-  const transicao = validarTransicao(solicitacao.status, "RESPONDIDA", { perfil: admin.perfil, ehDono: false });
+  const transicao = validarTransicao(solicitacao.status, "APROVADA", { perfil: admin.perfil, ehDono: false });
   if (!transicao.ok) return { erro: transicao.erro };
 
   if (dados.data.fornecedorEscolhidoId) {
@@ -148,7 +176,7 @@ export async function responderSolicitacao(_estado: EstadoForm, formData: FormDa
     await db.$transaction(async (tx) => {
       const { count } = await tx.solicitacaoCotacao.updateMany({
         where: { id, status: "EM_ANALISE" },
-        data: { status: "RESPONDIDA" },
+        data: { status: "APROVADA" },
       });
       if (count !== 1) throw new StatusAlterado();
       await tx.respostaCotacao.create({
@@ -163,10 +191,20 @@ export async function responderSolicitacao(_estado: EstadoForm, formData: FormDa
       });
     });
   } catch (erro) {
-    if (erro instanceof StatusAlterado) return { erro: "A solicitação já foi respondida ou mudou de status." };
+    if (erro instanceof StatusAlterado) return { erro: "A solicitação já foi decidida ou mudou de status." };
     throw erro;
   }
 
+  // Fora da transação: a chamada externa não pode segurar o banco nem desfazer a aprovação.
+  await sincronizarClickUp(id);
   revalidarSolicitacao(id);
   redirect(`/admin/solicitacoes/${id}`);
+}
+
+/** Admin tenta de novo criar a tarefa no ClickUp de uma solicitação aprovada. */
+export async function reenviarClickUp(formData: FormData): Promise<void> {
+  await exigirAdmin();
+  const id = String(formData.get("id") ?? "");
+  await sincronizarClickUp(id);
+  revalidarSolicitacao(id);
 }

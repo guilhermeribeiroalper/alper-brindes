@@ -1,17 +1,19 @@
 "use client";
 
 import { useActionState } from "react";
-import { responderSolicitacao } from "@/actions/solicitacoes";
+import { aprovarSolicitacao, cancelarSolicitacaoAdmin } from "@/actions/solicitacoes";
 import { Alerta, Campo, estilos } from "@/components/ui";
 
-export function FormResposta({
+export function FormAprovacao({
   solicitacaoId,
   fornecedores,
+  clickupConfigurado,
 }: {
   solicitacaoId: string;
   fornecedores: { id: string; nome: string }[];
+  clickupConfigurado: boolean;
 }) {
-  const [estado, acao, pendente] = useActionState(responderSolicitacao, undefined);
+  const [estado, acao, pendente] = useActionState(aprovarSolicitacao, undefined);
   const erros = estado?.errosCampo ?? {};
   const valores = estado?.valores ?? {};
 
@@ -73,11 +75,49 @@ export function FormResposta({
           <textarea id="observacoes" name="observacoes" rows={3} defaultValue={valores.observacoes} className={estilos.input} />
         </Campo>
       </div>
-      <div className="sm:col-span-3">
+      <div className="flex flex-wrap items-center gap-3 sm:col-span-3">
         <button type="submit" disabled={pendente} className={estilos.botao}>
-          {pendente ? "Registrando…" : "Registrar resposta"}
+          {pendente ? "Aprovando…" : "Aprovar solicitação"}
         </button>
+        <p className="text-xs text-on-surface-muted">
+          {clickupConfigurado
+            ? "Ao aprovar, uma tarefa com os brindes é criada no ClickUp."
+            : "Integração com o ClickUp não configurada: a aprovação será registrada e a tarefa poderá ser criada depois."}
+        </p>
       </div>
+    </form>
+  );
+}
+
+export function FormCancelamentoAdmin({ solicitacaoId }: { solicitacaoId: string }) {
+  const [estado, acao, pendente] = useActionState(cancelarSolicitacaoAdmin, undefined);
+  const erros = estado?.errosCampo ?? {};
+
+  return (
+    <form action={acao} className="space-y-4">
+      <input type="hidden" name="id" value={solicitacaoId} />
+      {estado?.erro && <Alerta tipo="erro">{estado.erro}</Alerta>}
+      <Campo
+        rotulo="Motivo do cancelamento"
+        nome="motivo"
+        erros={erros.motivo}
+        ajuda="Visível para o solicitante."
+      >
+        <textarea
+          id="motivo"
+          name="motivo"
+          rows={3}
+          required
+          minLength={5}
+          maxLength={1000}
+          defaultValue={estado?.valores?.motivo}
+          className={estilos.input}
+          aria-invalid={!!erros.motivo}
+        />
+      </Campo>
+      <button type="submit" disabled={pendente} className={estilos.botaoPerigo}>
+        {pendente ? "Cancelando…" : "Cancelar solicitação"}
+      </button>
     </form>
   );
 }

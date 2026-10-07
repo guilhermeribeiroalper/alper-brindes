@@ -17,7 +17,7 @@ export const esquemaEnvio = z.object({
     .max(2000, { error: "A justificativa deve ter no máximo 2.000 caracteres." }),
 });
 
-export const esquemaResposta = z.object({
+export const esquemaAprovacao = z.object({
   valorTotalFinal: z
     .string()
     .trim()
@@ -39,4 +39,12 @@ export const esquemaResposta = z.object({
     .min(0, { error: "O prazo não pode ser negativo." })
     .max(3650, { error: "Prazo muito longo." }),
   observacoes: textoOpcional,
+});
+
+export const esquemaCancelamentoAdmin = z.object({
+  motivo: z
+    .string()
+    .trim()
+    .min(5, { error: "Informe o motivo do cancelamento (mínimo de 5 caracteres)." })
+    .max(1000, { error: "O motivo deve ter no máximo 1.000 caracteres." }),
 });

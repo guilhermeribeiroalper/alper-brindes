@@ -60,13 +60,27 @@ export default async function DetalheSolicitacao(props: PageProps<"/solicitacoes
 
       {enviada && solicitacao.status === "ENVIADA" && (
         <div className="mb-4">
-          <Alerta tipo="sucesso">Solicitação enviada. O administrador vai analisar e responder por aqui.</Alerta>
+          <Alerta tipo="sucesso">Solicitação enviada. O administrador vai analisar e decidir por aqui.</Alerta>
+        </div>
+      )}
+
+      {solicitacao.status === "CANCELADA" && (
+        <div className="mb-6">
+          <Alerta tipo="aviso">
+            {solicitacao.canceladaPorId && solicitacao.canceladaPorId !== solicitacao.solicitanteId
+              ? "Solicitação cancelada pelo administrador"
+              : "Solicitação cancelada"}
+            {solicitacao.canceladaEm ? ` em ${formatarDataHora(solicitacao.canceladaEm)}` : ""}.
+            {solicitacao.motivoCancelamento && (
+              <span className="mt-1 block whitespace-pre-line">Motivo: {solicitacao.motivoCancelamento}</span>
+            )}
+          </Alerta>
         </div>
       )}
 
       {solicitacao.resposta && (
         <section className="mb-6 rounded-lg border border-success/50 bg-success/10 p-5">
-          <h2 className="font-display text-xl font-semibold text-on-surface">Resposta do administrador</h2>
+          <h2 className="font-display text-xl font-semibold text-on-surface">Solicitação aprovada</h2>
           <dl className="mt-3 grid gap-4 sm:grid-cols-3">
             <div>
               <dt className="text-xs text-on-surface">Valor total final</dt>
@@ -77,7 +91,7 @@ export default async function DetalheSolicitacao(props: PageProps<"/solicitacoes
               <dd className="text-lg">{solicitacao.resposta.prazoEntregaDias} dias</dd>
             </div>
             <div>
-              <dt className="text-xs text-on-surface">Respondida em</dt>
+              <dt className="text-xs text-on-surface">Aprovada em</dt>
               <dd className="text-lg">{formatarDataHora(solicitacao.resposta.respondidaEm)}</dd>
             </div>
           </dl>

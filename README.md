@@ -2,7 +2,7 @@
 
 Aplicação web interna para consultar brindes, obter uma estimativa de preço imediata e enviar solicitações formais de cotação ao administrador.
 
-- **ADMIN** cadastra produtos, fornecedores e preços por fornecedor (com faixas de quantidade, prazo e validade), responde às cotações e gerencia usuários.
+- **ADMIN** cadastra produtos, fornecedores e preços por fornecedor (com faixas de quantidade, prazo e validade), aprova ou cancela as cotações (a aprovação cria uma tarefa no ClickUp) e gerencia usuários.
 - **SOLICITANTE** consulta o catálogo, simula estimativas, monta uma lista (carrinho) e acompanha as próprias solicitações. **Nunca vê fornecedores**, só a faixa de preço.
 
 ## Stack
@@ -51,6 +51,9 @@ Entre com o e-mail e a senha definidos no `.env`.
 | `SEED_ADMIN_SENHA` | para o seed | Senha do admin inicial (mín. 8 caracteres recomendada) |
 | `SEED_ADMIN_NOME` | não | Nome do admin inicial (padrão "Administrador") |
 | `SEED_SOLICITANTE_EMAIL` / `SEED_SOLICITANTE_SENHA` | não | Solicitante de exemplo. Se a senha ficar vazia, ele não é criado |
+| `CLICKUP_API_TOKEN` | não | Token pessoal do ClickUp (começa com `pk_`). Sem ele, a aprovação funciona, mas a tarefa não é criada |
+| `CLICKUP_LIST_ID` | não | ID da lista do ClickUp onde as tarefas são criadas |
+| `CLICKUP_API_URL` | não | Só para testes; padrão `https://api.clickup.com/api/v2` |
 
 O seed pode ser executado várias vezes: não sobrescreve usuários existentes e só cria os produtos de exemplo se o catálogo estiver vazio.
 
@@ -89,7 +92,8 @@ npm test
 - Toda estimativa traz o aviso "Valor estimado, sujeito a confirmação pelo administrador."
 - O cálculo é feito **no servidor**: o navegador do solicitante recebe só os totais agregados, nunca os preços por fornecedor.
 - **Carrinho** = solicitação em `RASCUNHO`. Ao enviar, a estimativa de cada item fica congelada.
-- **Status**: RASCUNHO → ENVIADA → EM_ANALISE → RESPONDIDA. O solicitante cancela em RASCUNHO ou ENVIADA. As transições são protegidas contra concorrência (a gravação só acontece se o status ainda for o esperado).
+- **Status**: RASCUNHO → ENVIADA → EM_ANALISE → APROVADA. O solicitante cancela em RASCUNHO ou ENVIADA; o admin cancela, com motivo, em ENVIADA ou EM_ANALISE. As transições são protegidas contra concorrência (a gravação só acontece se o status ainda for o esperado).
+- **Aprovação e ClickUp**: o admin inicia a análise e aprova, informando valor total final, fornecedor, prazo e observações. Na aprovação, o sistema cria uma tarefa no ClickUp com os brindes (quantidades e estimativas), o fornecedor, o valor e o prazo, os dados do solicitante e a justificativa. A data necessária vira o prazo da tarefa. Se o ClickUp falhar ou não estiver configurado, a aprovação é salva mesmo assim, o erro aparece na solicitação e o admin pode reenviar. Uma trava impede tarefas duplicadas.
 - Produtos e fornecedores são **inativados**, nunca excluídos. Os inativos saem das estimativas, mas continuam nas solicitações antigas.
 - Toda mudança de valor unitário (e o cadastro inicial) gera um registro em `HistoricoPreco`.
 - Valores monetários são guardados em **centavos (inteiros)**.
@@ -169,11 +173,12 @@ O esquema não usa recursos exclusivos de nenhum dos dois bancos. A busca é fei
 
 | Evolução | Ponto de extensão |
 |---|---|
-| E-mail e notificações | Depois das transições em `src/actions/solicitacoes.ts` (envio, início da análise, resposta) |
+| E-mail e notificações | Depois das transições em `src/actions/solicitacoes.ts` (envio, início da análise, aprovação, cancelamento) |
 | SSO corporativo | Substituir `src/lib/auth/sessao.ts` e a tela de login. Os guards e as regras de permissão continuam os mesmos |
 | PDF da cotação | Gerar a partir da página `/admin/solicitacoes/[id]` |
 | Upload de imagens | Hoje `imagemUrl` é uma URL digitada pelo admin |
-| ERP, CRM, estoque, aprovação de orçamento | Não implementados |
+| ERP, CRM, estoque | Não implementados |
+| Outras integrações de tarefas | Seguir o modelo de `src/lib/integracoes/` (montagem pura + chamada com `fetch` injetável + sincronização com trava) |
 
 ## Observações conhecidas
 

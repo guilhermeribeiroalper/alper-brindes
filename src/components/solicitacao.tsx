@@ -9,7 +9,7 @@ const COR_STATUS = {
   RASCUNHO: "cinza",
   ENVIADA: "azul",
   EM_ANALISE: "amarelo",
-  RESPONDIDA: "verde",
+  APROVADA: "verde",
   CANCELADA: "vermelho",
 } as const;
 

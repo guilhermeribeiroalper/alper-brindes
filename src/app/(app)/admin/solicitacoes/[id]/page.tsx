@@ -2,14 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { exigirAdmin } from "@/lib/auth/guards";
-import { iniciarAnalise } from "@/actions/solicitacoes";
+import { iniciarAnalise, reenviarClickUp } from "@/actions/solicitacoes";
 import { BotaoEnviar } from "@/components/botao-enviar";
 import { ItensCongelados, SeloStatus } from "@/components/solicitacao";
 import { Alerta, Titulo, estilos } from "@/components/ui";
 import { hojeCivil } from "@/lib/datas";
 import { codigoSolicitacao, formatarBRL, formatarData, formatarDataHora } from "@/lib/formatacao";
+import { configuracaoClickUp } from "@/lib/integracoes/clickup";
 import { faixasAplicaveis } from "@/lib/regras/estimativa";
-import { FormResposta } from "./form-resposta";
+import { adminPodeCancelar } from "@/lib/regras/status";
+import { FormAprovacao, FormCancelamentoAdmin } from "./forms";
 
 export const metadata = { title: "Solicitação (admin) · Catálogo de Brindes" };
 
@@ -22,6 +24,7 @@ export default async function DetalheSolicitacaoAdmin(props: PageProps<"/admin/s
     where: { id },
     include: {
       solicitante: { select: { nome: true, email: true } },
+      canceladaPor: { select: { nome: true } },
       itens: {
         include: {
           produto: {
@@ -82,7 +85,11 @@ export default async function DetalheSolicitacaoAdmin(props: PageProps<"/admin/s
       {solicitacao.status === "CANCELADA" && (
         <div className="mb-4">
           <Alerta tipo="aviso">
-            Cancelada pelo solicitante{solicitacao.canceladaEm ? ` em ${formatarDataHora(solicitacao.canceladaEm)}` : ""}.
+            Cancelada {solicitacao.canceladaPor ? `por ${solicitacao.canceladaPor.nome}` : "pelo solicitante"}
+            {solicitacao.canceladaEm ? ` em ${formatarDataHora(solicitacao.canceladaEm)}` : ""}.
+            {solicitacao.motivoCancelamento && (
+              <span className="mt-1 block whitespace-pre-line">Motivo: {solicitacao.motivoCancelamento}</span>
+            )}
           </Alerta>
         </div>
       )}
@@ -118,7 +125,7 @@ export default async function DetalheSolicitacaoAdmin(props: PageProps<"/admin/s
       <h2 className="mb-3 font-display text-xl font-semibold text-on-surface">Itens e estimativas congeladas no envio</h2>
       <ItensCongelados itens={solicitacao.itens} linkProduto={(produtoId) => `/admin/produtos/${produtoId}/precos`} />
 
-      {solicitacao.status !== "CANCELADA" && solicitacao.status !== "RESPONDIDA" && (
+      {(solicitacao.status === "ENVIADA" || solicitacao.status === "EM_ANALISE") && (
         <>
           <h2 className="mb-3 mt-8 font-display text-xl font-semibold text-on-surface">Preços vigentes hoje por fornecedor</h2>
           <div className="space-y-3">
@@ -155,20 +162,33 @@ export default async function DetalheSolicitacaoAdmin(props: PageProps<"/admin/s
 
       {solicitacao.status === "ENVIADA" && (
         <div className="mt-8">
-          <Alerta tipo="info">Clique em &quot;Iniciar análise&quot; para assumir a solicitação e registrar a resposta.</Alerta>
+          <Alerta tipo="info">Clique em &quot;Iniciar análise&quot; para assumir a solicitação e depois aprová-la.</Alerta>
         </div>
       )}
 
       {solicitacao.status === "EM_ANALISE" && (
         <section className={`${estilos.cartao} mt-8 p-6`}>
-          <h2 className="mb-4 font-display text-xl font-semibold text-on-surface">Registrar resposta</h2>
-          <FormResposta solicitacaoId={solicitacao.id} fornecedores={fornecedores} />
+          <h2 className="mb-4 font-display text-xl font-semibold text-on-surface">Aprovar</h2>
+          <FormAprovacao
+            solicitacaoId={solicitacao.id}
+            fornecedores={fornecedores}
+            clickupConfigurado={configuracaoClickUp() !== null}
+          />
         </section>
+      )}
+
+      {adminPodeCancelar(solicitacao.status) && (
+        <details className={`${estilos.cartao} mt-6 p-6`}>
+          <summary className="cursor-pointer font-semibold text-error">Cancelar esta solicitação</summary>
+          <div className="mt-4">
+            <FormCancelamentoAdmin solicitacaoId={solicitacao.id} />
+          </div>
+        </details>
       )}
 
       {solicitacao.resposta && (
         <section className="mt-8 rounded-lg border border-success/50 bg-success/10 p-5">
-          <h2 className="font-display text-xl font-semibold text-on-surface">Resposta registrada</h2>
+          <h2 className="font-display text-xl font-semibold text-on-surface">Aprovação</h2>
           <dl className="mt-3 grid gap-4 text-sm sm:grid-cols-4">
             <div>
               <dt className="text-xs text-on-surface">Valor total final</dt>
@@ -183,7 +203,7 @@ export default async function DetalheSolicitacaoAdmin(props: PageProps<"/admin/s
               <dd>{solicitacao.resposta.prazoEntregaDias} dias</dd>
             </div>
             <div>
-              <dt className="text-xs text-on-surface">Respondida por</dt>
+              <dt className="text-xs text-on-surface">Aprovada por</dt>
               <dd>
                 {solicitacao.resposta.admin.nome}
                 <span className="block text-xs">{formatarDataHora(solicitacao.resposta.respondidaEm)}</span>
@@ -193,6 +213,33 @@ export default async function DetalheSolicitacaoAdmin(props: PageProps<"/admin/s
           {solicitacao.resposta.observacoes && (
             <p className="mt-3 whitespace-pre-line text-sm">{solicitacao.resposta.observacoes}</p>
           )}
+
+          <div className="mt-5 border-t border-success/40 pt-4 text-sm">
+            <p className="text-xs font-semibold tracking-wide text-on-surface uppercase">Tarefa no ClickUp</p>
+            {solicitacao.resposta.clickupTaskUrl ? (
+              <a
+                href={solicitacao.resposta.clickupTaskUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${estilos.link} mt-1 inline-block`}
+              >
+                Abrir tarefa no ClickUp ↗
+              </a>
+            ) : (
+              <div className="mt-2 space-y-3">
+                <Alerta tipo="aviso">
+                  A tarefa ainda não foi criada.
+                  {solicitacao.resposta.clickupErro && <span className="mt-1 block">{solicitacao.resposta.clickupErro}</span>}
+                </Alerta>
+                <form action={reenviarClickUp}>
+                  <input type="hidden" name="id" value={solicitacao.id} />
+                  <BotaoEnviar variante="botaoSecundario" pendente="Enviando…">
+                    Criar tarefa no ClickUp
+                  </BotaoEnviar>
+                </form>
+              </div>
+            )}
+          </div>
         </section>
       )}
     </>
