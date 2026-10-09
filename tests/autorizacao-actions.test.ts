@@ -56,6 +56,7 @@ const AUTENTICADAS = [
   "carrinho.adicionarAoCarrinho",
   "carrinho.alterarQuantidadeItem",
   "carrinho.removerItem",
+  "carrinho.esvaziarCarrinho",
   "catalogo.simularEstimativa",
   "solicitacoes.enviarSolicitacao",
   "solicitacoes.cancelarSolicitacao",

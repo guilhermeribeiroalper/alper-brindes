@@ -11,7 +11,8 @@ export const metadata = { title: "Minhas solicitações · Catálogo de Brindes"
 export default async function MinhasSolicitacoes() {
   const usuario = await exigirUsuario();
   const solicitacoes = await db.solicitacaoCotacao.findMany({
-    where: { solicitanteId: usuario.id, status: { not: "RASCUNHO" } },
+    // Só o que foi enviado: rascunhos (inclusive descartados antes desta versão) ficam de fora.
+    where: { solicitanteId: usuario.id, enviadaEm: { not: null } },
     include: {
       itens: { select: { estimativaMinimaCentavos: true, estimativaMaximaCentavos: true } },
       resposta: { select: { valorTotalFinalCentavos: true } },
@@ -23,8 +24,8 @@ export default async function MinhasSolicitacoes() {
     <>
       <Titulo
         acoes={
-          <Link href="/minha-solicitacao" className={estilos.botaoSecundario}>
-            Ir para minha solicitação atual
+          <Link href="/carrinho" className={estilos.botaoSecundario}>
+            Ir para o carrinho
           </Link>
         }
       >

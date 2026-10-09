@@ -18,7 +18,7 @@ const esquemaItem = z.object({
 });
 
 function revalidarCarrinho() {
-  revalidatePath("/minha-solicitacao");
+  revalidatePath("/carrinho");
   revalidatePath("/", "layout"); // contador do carrinho na navegação
 }
 
@@ -43,8 +43,8 @@ export async function adicionarAoCarrinho(_estado: EstadoForm, formData: FormDat
   revalidarCarrinho();
   return {
     sucesso: existente
-      ? `Quantidade atualizada para ${dados.data.quantidade} na sua solicitação.`
-      : "Item adicionado à sua solicitação.",
+      ? `Quantidade atualizada para ${dados.data.quantidade} no carrinho.`
+      : "Item adicionado ao carrinho.",
   };
 }
 
@@ -71,5 +71,16 @@ export async function removerItem(formData: FormData): Promise<void> {
   const rascunho = await obterRascunho(usuario.id);
   if (!rascunho) return;
   await db.itemSolicitacao.deleteMany({ where: { id: itemId, solicitacaoId: rascunho.id } });
+  revalidarCarrinho();
+}
+
+/** Apaga o carrinho do usuário (o rascunho e seus itens). Não gera registro em "Minhas solicitações". */
+export async function esvaziarCarrinho(): Promise<void> {
+  const usuario = await exigirUsuario();
+  const filtro = { solicitanteId: usuario.id, status: "RASCUNHO" as const };
+  await db.$transaction([
+    db.itemSolicitacao.deleteMany({ where: { solicitacao: filtro } }),
+    db.solicitacaoCotacao.deleteMany({ where: filtro }),
+  ]);
   revalidarCarrinho();
 }

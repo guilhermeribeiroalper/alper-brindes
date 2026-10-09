@@ -24,7 +24,7 @@ export default async function FilaSolicitacoes(props: PageProps<"/admin/solicita
 
   // Rascunhos são carrinhos pessoais e não aparecem na fila.
   const solicitacoes = await db.solicitacaoCotacao.findMany({
-    where: { status: { in: filtro.status } },
+    where: { status: { in: filtro.status }, enviadaEm: { not: null } },
     include: {
       solicitante: { select: { nome: true } },
       resposta: { select: { valorTotalFinalCentavos: true } },

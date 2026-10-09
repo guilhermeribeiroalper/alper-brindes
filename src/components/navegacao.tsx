@@ -8,7 +8,7 @@ import type { Perfil } from "@/lib/auth/permissoes";
 
 const LINKS_TODOS = [
   { href: "/catalogo", rotulo: "Catálogo" },
-  { href: "/minha-solicitacao", rotulo: "Minha solicitação" },
+  { href: "/carrinho", rotulo: "Carrinho" },
   { href: "/solicitacoes", rotulo: "Minhas solicitações" },
 ];
 
@@ -84,7 +84,7 @@ function Marca() {
 export function Navegacao({ nome, perfil, itensCarrinho }: { nome: string; perfil: Perfil; itensCarrinho: number }) {
   const caminho = usePathname();
   const admin = perfil === "ADMIN";
-  const contadorDe = (href: string) => (href === "/minha-solicitacao" ? itensCarrinho : undefined);
+  const contadorDe = (href: string) => (href === "/carrinho" ? itensCarrinho : undefined);
 
   const usuario = (
     <form action={sair} className="flex items-center gap-3">

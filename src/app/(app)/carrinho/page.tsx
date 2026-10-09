@@ -3,8 +3,7 @@ import { db } from "@/lib/db";
 import { exigirUsuario } from "@/lib/auth/guards";
 import { estimarItens } from "@/lib/consultas/catalogo";
 import { obterRascunho } from "@/lib/consultas/solicitacoes";
-import { alterarQuantidadeItem, removerItem } from "@/actions/carrinho";
-import { cancelarSolicitacao } from "@/actions/solicitacoes";
+import { alterarQuantidadeItem, esvaziarCarrinho, removerItem } from "@/actions/carrinho";
 import { BotaoEnviar } from "@/components/botao-enviar";
 import { AvisoEstimativa } from "@/components/estimativa";
 import { FaixaTotal } from "@/components/solicitacao";
@@ -14,9 +13,9 @@ import { formatarPrazo } from "@/lib/formatacao";
 import { somarEstimativas } from "@/lib/regras/estimativa";
 import { FormEnvio } from "./form-envio";
 
-export const metadata = { title: "Minha solicitação · Catálogo de Brindes" };
+export const metadata = { title: "Carrinho · Catálogo de Brindes" };
 
-export default async function MinhaSolicitacao() {
+export default async function Carrinho() {
   const usuario = await exigirUsuario();
   const rascunho = await obterRascunho(usuario.id);
   const itens = rascunho
@@ -30,9 +29,9 @@ export default async function MinhaSolicitacao() {
   if (!rascunho || itens.length === 0) {
     return (
       <>
-        <Titulo>Minha solicitação</Titulo>
-        <EstadoVazio titulo="Sua solicitação está vazia.">
-          <p>Escolha brindes no catálogo, simule a quantidade e clique em &quot;Adicionar à solicitação&quot;.</p>
+        <Titulo>Carrinho</Titulo>
+        <EstadoVazio titulo="Seu carrinho está vazio.">
+          <p>Escolha brindes no catálogo, simule a quantidade e clique em &quot;Adicionar ao carrinho&quot;.</p>
           <Link href="/catalogo" className={`${estilos.botao} mt-4`}>
             Ir para o catálogo
           </Link>
@@ -56,15 +55,14 @@ export default async function MinhaSolicitacao() {
     <>
       <Titulo
         acoes={
-          <form action={cancelarSolicitacao}>
-            <input type="hidden" name="id" value={rascunho.id} />
-            <BotaoEnviar variante="botaoPerigo" pendente="Descartando…">
-              Descartar rascunho
+          <form action={esvaziarCarrinho}>
+            <BotaoEnviar variante="botaoPerigo" pendente="Esvaziando…">
+              Esvaziar carrinho
             </BotaoEnviar>
           </form>
         }
       >
-        Minha solicitação
+        Carrinho
       </Titulo>
 
       {temIndisponivel && (

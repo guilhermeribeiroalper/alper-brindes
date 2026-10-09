@@ -141,7 +141,7 @@ src/
     login/               tela de login
     (app)/               área logada (layout com navegação)
       catalogo/          catálogo e detalhe com simulador
-      minha-solicitacao/ carrinho e envio formal
+      carrinho/          carrinho e envio formal
       solicitacoes/      minhas solicitações e detalhe
       admin/             painel, fila, produtos, preços, fornecedores, usuários
   components/            componentes de interface

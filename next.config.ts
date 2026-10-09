@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Fixa a raiz do projeto (há um package-lock.json solto em pasta superior em algumas máquinas).
   turbopack: { root: process.cwd() },
+  // Endereço antigo do carrinho (antes chamado "Minha solicitação").
+  redirects() {
+    return [{ source: "/minha-solicitacao", destination: "/carrinho", permanent: true }];
+  },
   experimental: {
     // Com o cache em disco do dev reaproveitado entre reinícios, as rotas
     // /admin/produtos/[id]/precos/** passavam a responder 404 até o arquivo ser editado

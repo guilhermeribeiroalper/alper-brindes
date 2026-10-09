@@ -30,7 +30,7 @@ export default async function DetalheSolicitacao(props: PageProps<"/solicitacoes
   });
   // Não revela se a solicitação existe quando ela é de outra pessoa.
   if (!solicitacao || !podeVerSolicitacao(usuario, solicitacao)) notFound();
-  if (solicitacao.status === "RASCUNHO") redirect("/minha-solicitacao");
+  if (solicitacao.status === "RASCUNHO") redirect("/carrinho");
 
   const dono = ehDonoDaSolicitacao(usuario, solicitacao);
 

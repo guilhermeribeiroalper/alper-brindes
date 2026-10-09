@@ -83,7 +83,7 @@ export async function enviarSolicitacao(_estado: EstadoForm, formData: FormData)
   }
 
   revalidarSolicitacao(rascunho.id);
-  revalidatePath("/minha-solicitacao");
+  revalidatePath("/carrinho");
   redirect(`/solicitacoes/${rascunho.id}?enviada=1`);
 }
 
@@ -120,8 +120,8 @@ export async function cancelarSolicitacao(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   const anterior = await transicionar(id, "CANCELADA", usuario, "DONO", { canceladaEm: new Date() });
   revalidarSolicitacao(id);
-  revalidatePath("/minha-solicitacao");
-  if (anterior.status === "RASCUNHO") redirect("/minha-solicitacao");
+  revalidatePath("/carrinho");
+  if (anterior.status === "RASCUNHO") redirect("/carrinho");
 }
 
 /** Admin assume a solicitação (ENVIADA → EM_ANALISE). */

@@ -74,14 +74,14 @@ export function Simulador({
       {estadoCarrinho?.sucesso && (
         <Alerta tipo="sucesso">
           {estadoCarrinho.sucesso}{" "}
-          <Link href="/minha-solicitacao" className="font-medium underline">
-            Ver minha solicitação
+          <Link href="/carrinho" className="font-medium underline">
+            Ver carrinho
           </Link>
         </Alerta>
       )}
 
       <button type="submit" disabled={!quantidadeValida || adicionando} className={`${estilos.botao} w-full sm:w-auto`}>
-        {adicionando ? "Adicionando…" : "Adicionar à solicitação"}
+        {adicionando ? "Adicionando…" : "Adicionar ao carrinho"}
       </button>
     </form>
   );
