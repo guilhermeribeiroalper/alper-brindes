@@ -46,11 +46,12 @@ Entre com o e-mail e a senha definidos no `.env`.
 
 | Variável | Obrigatória | Descrição |
 |---|---|---|
-| `DATABASE_URL` | sim | SQLite: `file:./prisma/dev.db` (caminho relativo à raiz). PostgreSQL: `postgresql://usuario:senha@host:5432/brindes` |
+| `DATABASE_URL` | sim | `file:./prisma/dev.db` usa SQLite (desenvolvimento). `postgresql://...` usa PostgreSQL (produção); veja a seção do Render |
 | `SEED_ADMIN_EMAIL` | para o seed | E-mail do admin inicial |
 | `SEED_ADMIN_SENHA` | para o seed | Senha do admin inicial (mín. 8 caracteres recomendada) |
 | `SEED_ADMIN_NOME` | não | Nome do admin inicial (padrão "Administrador") |
 | `SEED_SOLICITANTE_EMAIL` / `SEED_SOLICITANTE_SENHA` | não | Solicitante de exemplo. Se a senha ficar vazia, ele não é criado |
+| `SEED_PRODUTOS_EXEMPLO` | não | `false` impede o seed de criar fornecedores e produtos de exemplo (padrão: cria, se o catálogo estiver vazio) |
 | `CLICKUP_API_TOKEN` | não | Token pessoal do ClickUp (começa com `pk_`). Sem ele, a aprovação funciona, mas a tarefa não é criada |
 | `CLICKUP_LIST_ID` | não | ID da lista do ClickUp onde as tarefas são criadas |
 | `CLICKUP_API_URL` | não | Só para testes; padrão `https://api.clickup.com/api/v2` |
@@ -130,7 +131,8 @@ A interface segue o **Alper Design System** (tokens e tipografia). Os tokens est
 
 ```
 prisma/
-  schema.prisma          modelo de dados
+  schema.prisma          modelo de dados (SQLite, desenvolvimento)
+  postgresql/            esquema e migrações do PostgreSQL (produção)
   migrations/            migrações versionadas
   seed.ts                dados iniciais (credenciais vêm do .env)
 src/
@@ -153,21 +155,39 @@ tests/                   testes automatizados
 docs/SUPOSICOES.md       suposições registradas
 ```
 
-## Produção com PostgreSQL
+## Produção com PostgreSQL (Render)
 
-O Prisma não permite escolher o banco por variável de ambiente. Para usar PostgreSQL:
+O banco é escolhido pela `DATABASE_URL`:
 
-1. Em `prisma/schema.prisma`, troque `provider = "sqlite"` por `provider = "postgresql"`.
-2. Instale o adaptador: `npm install @prisma/adapter-pg` (o pacote já inclui o driver `pg`).
-3. Em `src/lib/db.ts` e `prisma/seed.ts`, troque o adaptador:
-   ```ts
-   import { PrismaPg } from "@prisma/adapter-pg";
-   const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+| `DATABASE_URL` | Banco | Esquema e migrações |
+|---|---|---|
+| `file:./prisma/dev.db` | SQLite (desenvolvimento) | `prisma/schema.prisma`, `prisma/migrations/` |
+| `postgresql://...` | PostgreSQL (produção) | `prisma/postgresql/schema.prisma`, `prisma/postgresql/migrations/` |
+
+Os dois esquemas têm os mesmos modelos (o teste `tests/esquemas-prisma.test.ts` garante isso). Ao mudar o modelo de dados:
+1. Edite `prisma/schema.prisma` e copie a mudança para `prisma/postgresql/schema.prisma`.
+2. `npm run db:migrate` gera a migração do SQLite.
+3. Gere a migração do PostgreSQL sem precisar de um servidor Postgres:
+   ```bash
+   npx prisma migrate diff --from-migrations prisma/postgresql/migrations --to-schema prisma/postgresql/schema.prisma --script -o prisma/postgresql/migrations/<data>_<nome>/migration.sql
    ```
-4. As migrações SQL atuais são específicas do SQLite. Apague `prisma/migrations/` e gere a migração inicial apontando `DATABASE_URL` para um PostgreSQL de desenvolvimento: `npx prisma migrate dev --name init` e depois `npx prisma generate`.
-5. No servidor de produção: `npm run db:deploy`, `npm run db:seed` (uma vez), `npm run build` e `npm start`.
 
-O esquema não usa recursos exclusivos de nenhum dos dois bancos. A busca é feita na aplicação para ignorar acentos e maiúsculas da mesma forma nos dois.
+### Deploy no Render
+
+1. Crie um **PostgreSQL** no Render e copie a **Internal Database URL** (só funciona dentro do Render).
+2. No **Web Service**:
+   - **Build Command:** `npm ci && npx prisma generate && npx prisma migrate deploy && npx prisma db seed && npm run build`
+   - **Start Command:** `npm start`
+   - **Environment:**
+     - `DATABASE_URL` = a Internal Database URL
+     - `SEED_ADMIN_EMAIL`, `SEED_ADMIN_SENHA`, `SEED_ADMIN_NOME` (admin inicial; o seed não altera usuários existentes)
+     - opcionalmente `SEED_SOLICITANTE_EMAIL` e `SEED_SOLICITANTE_SENHA`
+     - `SEED_PRODUTOS_EXEMPLO=false` para não criar o catálogo de exemplo
+     - `CLICKUP_API_TOKEN` e `CLICKUP_LIST_ID`, se for usar a integração
+3. **Não** defina `NODE_ENV=production` nas variáveis do Render. O build precisa das dependências de desenvolvimento (Prisma CLI e tsx), e o `npm start` já roda em modo produção.
+4. O Render serve via HTTPS, que é necessário para o cookie de sessão (`Secure` em produção).
+
+O seed roda a cada deploy, mas não duplica nada: só cria usuários que não existem e só cria os produtos de exemplo se o catálogo estiver vazio. Para não criar o catálogo de exemplo em produção, defina `SEED_PRODUTOS_EXEMPLO=false`.
 
 ## Fora do escopo do MVP (e onde encaixar depois)
 

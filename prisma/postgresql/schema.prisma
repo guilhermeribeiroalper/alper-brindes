@@ -1,15 +1,14 @@
-// Esquema do Catálogo de Brindes — DESENVOLVIMENTO (SQLite).
-// Produção usa prisma/postgresql/schema.prisma, com os mesmos modelos: toda mudança aqui
-// deve ser copiada para lá (o teste tests/esquemas-prisma.test.ts compara os dois).
-// Evite recursos exclusivos de um dos bancos. Valores monetários são inteiros em centavos.
+// ESQUEMA DE PRODUÇÃO (PostgreSQL). Cópia de prisma/schema.prisma: os modelos devem ser
+// idênticos (o teste tests/esquemas-prisma.test.ts compara). Mudam só o provider e o output.
+// Usado quando DATABASE_URL começa com postgres:// ou postgresql:// (ver prisma.config.ts).
 
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../../src/generated/prisma"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 enum Perfil {

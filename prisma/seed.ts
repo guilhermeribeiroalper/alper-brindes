@@ -1,12 +1,10 @@
 import "dotenv/config";
 import bcrypt from "bcryptjs";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { hojeCivil, somarDias } from "../src/lib/datas";
+import { criarAdaptador } from "../src/lib/adaptador-banco";
 
-const db = new PrismaClient({
-  adapter: new PrismaBetterSqlite3({ url: process.env.DATABASE_URL ?? "" }),
-});
+const db = new PrismaClient({ adapter: criarAdaptador(process.env.DATABASE_URL) });
 
 function exigirEnv(nome: string): string {
   const valor = process.env[nome]?.trim();
@@ -60,6 +58,10 @@ async function main() {
     console.log(`Solicitante: ${s.email}`);
   }
 
+  if (process.env.SEED_PRODUTOS_EXEMPLO?.trim().toLowerCase() === "false") {
+    console.log("SEED_PRODUTOS_EXEMPLO=false: catálogo de exemplo não criado.");
+    return;
+  }
   if ((await db.produto.count()) > 0) {
     console.log("Catálogo já possui produtos; dados de exemplo não foram recriados.");
     return;
