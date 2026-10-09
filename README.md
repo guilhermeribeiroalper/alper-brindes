@@ -176,8 +176,9 @@ Os dois esquemas têm os mesmos modelos (o teste `tests/esquemas-prisma.test.ts`
 
 1. Crie um **PostgreSQL** no Render e copie a **Internal Database URL** (só funciona dentro do Render).
 2. No **Web Service**:
-   - **Build Command:** `npm ci && npx prisma generate && npx prisma migrate deploy && npx prisma db seed && npm run build`
-   - **Start Command:** `npm start`
+   - **Build Command:** `npm ci && npx prisma generate && npm run build`
+   - **Start Command:** `npx prisma migrate deploy && npx prisma db seed && npm start`
+     (as migrações e o seed rodam na inicialização porque a Internal Database URL só é acessível com o serviço rodando, não durante o build)
    - **Environment:**
      - `DATABASE_URL` = a Internal Database URL
      - `SEED_ADMIN_EMAIL`, `SEED_ADMIN_SENHA`, `SEED_ADMIN_NOME` (admin inicial; o seed não altera usuários existentes)
@@ -187,7 +188,7 @@ Os dois esquemas têm os mesmos modelos (o teste `tests/esquemas-prisma.test.ts`
 3. **Não** defina `NODE_ENV=production` nas variáveis do Render. O build precisa das dependências de desenvolvimento (Prisma CLI e tsx), e o `npm start` já roda em modo produção.
 4. O Render serve via HTTPS, que é necessário para o cookie de sessão (`Secure` em produção).
 
-O seed roda a cada deploy, mas não duplica nada: só cria usuários que não existem e só cria os produtos de exemplo se o catálogo estiver vazio. Para não criar o catálogo de exemplo em produção, defina `SEED_PRODUTOS_EXEMPLO=false`.
+O `migrate deploy` só aplica migrações pendentes, e o seed roda a cada inicialização sem duplicar nada: só cria usuários que não existem e só cria os produtos de exemplo se o catálogo estiver vazio. Para não criar o catálogo de exemplo em produção, defina `SEED_PRODUTOS_EXEMPLO=false`.
 
 ## Fora do escopo do MVP (e onde encaixar depois)
 
