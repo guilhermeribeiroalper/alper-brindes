@@ -6,12 +6,6 @@ import { criarAdaptador } from "../src/lib/adaptador-banco";
 
 const db = new PrismaClient({ adapter: criarAdaptador(process.env.DATABASE_URL) });
 
-function exigirEnv(nome: string): string {
-  const valor = process.env[nome]?.trim();
-  if (!valor) throw new Error(`Defina ${nome} no arquivo .env antes de rodar o seed.`);
-  return valor;
-}
-
 async function upsertUsuario(dados: {
   nome: string;
   email: string;
@@ -35,15 +29,25 @@ async function upsertUsuario(dados: {
   });
 }
 
+// Roda também na inicialização do servidor (npm start): nunca falha por falta de variável,
+// só avisa, para o serviço não ficar reiniciando em loop.
 async function main() {
-  const admin = await upsertUsuario({
-    nome: process.env.SEED_ADMIN_NOME?.trim() || "Administrador",
-    email: exigirEnv("SEED_ADMIN_EMAIL"),
-    senha: exigirEnv("SEED_ADMIN_SENHA"),
-    perfil: "ADMIN",
-    departamento: "Compras",
-  });
-  console.log(`Admin: ${admin.email}`);
+  const emailAdmin = process.env.SEED_ADMIN_EMAIL?.trim();
+  const senhaAdmin = process.env.SEED_ADMIN_SENHA?.trim();
+  let admin = null;
+  if (emailAdmin && senhaAdmin) {
+    admin = await upsertUsuario({
+      nome: process.env.SEED_ADMIN_NOME?.trim() || "Administrador",
+      email: emailAdmin,
+      senha: senhaAdmin,
+      perfil: "ADMIN",
+      departamento: "Compras",
+    });
+    console.log(`Admin: ${admin.email}`);
+  } else {
+    console.warn("AVISO: SEED_ADMIN_EMAIL e SEED_ADMIN_SENHA não definidos; admin inicial não foi criado.");
+    admin = await db.usuario.findFirst({ where: { perfil: "ADMIN" } });
+  }
 
   const emailSolicitante = process.env.SEED_SOLICITANTE_EMAIL?.trim();
   const senhaSolicitante = process.env.SEED_SOLICITANTE_SENHA?.trim();
@@ -58,6 +62,10 @@ async function main() {
     console.log(`Solicitante: ${s.email}`);
   }
 
+  if (!admin) {
+    console.warn("AVISO: nenhum admin no banco; catálogo de exemplo não foi criado.");
+    return;
+  }
   if (process.env.SEED_PRODUTOS_EXEMPLO?.trim().toLowerCase() === "false") {
     console.log("SEED_PRODUTOS_EXEMPLO=false: catálogo de exemplo não criado.");
     return;

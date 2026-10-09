@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "prisma migrate deploy && prisma db seed && next start",
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -16,7 +16,8 @@
     "db:studio": "prisma studio",
     "postinstall": "prisma generate",
     "typecheck": "tsc --noEmit",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "start:somente-servidor": "next start"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.10.0",
